@@ -1,4 +1,9 @@
+using Database.Extensions;
 using NLog.Extensions.Logging;
+using Server.Data;
+using Server.Data.Interfaces;
+using Server.Services;
+using Server.Services.Interfaces;
 
 namespace Server;
 
@@ -20,7 +25,8 @@ public class Program
             loggingBuilder.ClearProviders();
             loggingBuilder.AddNLog();
         });
-        
+        builder.Services.AddUnitOfWork<IUnitOfWork, UnitOfWork>(builder.Configuration);
+        builder.Services.AddScoped<IGameService, GameService>();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -31,7 +37,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-        
+        app.UseTransaction();
         app.MapControllers();
 
         app.Run();

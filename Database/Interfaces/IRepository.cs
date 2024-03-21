@@ -53,4 +53,6 @@ public interface IRepository<T>
     Task<IEnumerable<T>> FindAsync(Filter? filter, string? orderBy, int? offset, int? count, bool? sortDescending);
 
     Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
+    
+    Task<List<T>> ReadAllAsync();
 }

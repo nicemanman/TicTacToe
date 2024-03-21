@@ -1,0 +1,22 @@
+﻿services:
+  server:
+    image: tic-tac-toe-server
+    ports:
+      - '5000:8080'
+    build:
+      context: .
+      dockerfile: Server/Dockerfile
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      
+volumes:
+  db:
+    driver: local

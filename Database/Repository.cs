@@ -59,7 +59,7 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
     {
         return await _dbSet.FirstOrDefaultAsync(expression);
     }
-    
+
     /// <summary>
     /// Получение сущности
     /// </summary>
@@ -69,6 +69,11 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
     {
         T? entity = await _dbSet.FirstOrDefaultAsync(u => u.UUID == uuid);
         return entity;
+    }
+    
+    public async Task<List<T>> ReadAllAsync()
+    {
+        return _dbSet.ToList();
     }
     
     /// <summary>

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Server.Services;
+using Server.Services.Interfaces;
 
 namespace Server.Controllers;
 
@@ -6,9 +8,23 @@ namespace Server.Controllers;
 [Route("api/[controller]")]
 public class GameController : Controller
 {
-    [HttpPost]   
-    public async Task<IActionResult> CreateGame()
+    private readonly IGameService _gameService;
+
+    public GameController(IGameService gameService)
     {
-        return Ok();
+        _gameService = gameService;
+    }
+    
+    [HttpPost]   
+    public async Task<IActionResult> Create()
+    {
+        return Ok(await _gameService.CreateAsync());
+    }
+    
+    [HttpGet]   
+    public async Task<IActionResult> Get()
+    {
+        var games = await _gameService.GetAllGamesAsync();
+        return Ok(games);
     }
 }

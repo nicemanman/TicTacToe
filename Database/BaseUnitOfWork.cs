@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Database.Interfaces;
+using Database.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NLog;
 using LogLevel = NLog.LogLevel;
 
@@ -10,13 +12,20 @@ public class BaseUnitOfWork : DbContext, IBaseUnitOfWork
 {
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private bool _isDisposed;
-
-    public BaseUnitOfWork()
+    
+    public string ConnectionString { get; set; }
+    public bool UseAutoMigration { get; set; }
+    
+    public BaseUnitOfWork(IConfiguration configuration)
     {
+        ConnectionString = configuration.GetSection(DbConnectionOptions.ConnectionStringConfigString).Value;
+        UseAutoMigration = configuration.GetSection(DbConnectionOptions.UseAutoMigrationConfigString).Get<bool>();
+        
         if (_logger.IsEnabled(LogLevel.Trace))
             _logger.Log(LogLevel.Trace, $"New UnitOfWork with ContextId {ContextId} has been created");
     }
-    
+
+
     public bool IsDisposed
     {
         get => _isDisposed;
