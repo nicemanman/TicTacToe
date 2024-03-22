@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Server.Data;
@@ -11,9 +12,11 @@ using Server.Data;
 namespace Server.Migrations
 {
     [DbContext(typeof(UnitOfWork))]
-    partial class UnitOfWorkModelSnapshot : ModelSnapshot
+    [Migration("20240322090406_ChangedMapFieldToFieldsField")]
+    partial class ChangedMapFieldToFieldsField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,6 +43,9 @@ namespace Server.Migrations
                             b1.Property<Guid>("GameUUID")
                                 .HasColumnType("uuid");
 
+                            b1.Property<Guid>("UUID")
+                                .HasColumnType("uuid");
+
                             b1.HasKey("GameUUID");
 
                             b1.ToTable("Games");
@@ -58,14 +64,8 @@ namespace Server.Migrations
 
                                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
 
-                                    b2.Property<int>("IndexX")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<int>("IndexY")
-                                        .HasColumnType("integer");
-
-                                    b2.Property<bool>("IsX")
-                                        .HasColumnType("boolean");
+                                    b2.Property<Guid>("UUID")
+                                        .HasColumnType("uuid");
 
                                     b2.HasKey("GameMapGameUUID", "Id");
 

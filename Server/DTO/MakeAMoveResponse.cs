@@ -1,11 +1,11 @@
 ﻿namespace Server.DTO;
 
-public class GetGameErrorResponse
+public class MakeAMoveErrorResponse
 {
     public string Error { get; set; }
 }
 
-public class GetGameSuccessResponse 
+public class MakeAMoveSuccessResponse 
 {
     public GameDTO Game { get; set; }
 }

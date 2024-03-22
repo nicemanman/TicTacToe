@@ -1,4 +1,5 @@
-﻿using Localization.Common;
+﻿using AutoMapper;
+using Localization.Common;
 using Localization.Game;
 using Microsoft.AspNetCore.Mvc;
 using Server.DataModel;
@@ -14,11 +15,15 @@ public class GameController : Controller
 {
     private readonly IGameService _gameService;
     private readonly ILogger<GameController> _logger;
+    private readonly IMapper _mapper;
 
-    public GameController(IGameService gameService, ILogger<GameController> logger)
+    public GameController(IGameService gameService, 
+        ILogger<GameController> logger, 
+        IMapper mapper)
     {
         _gameService = gameService;
         _logger = logger;
+        _mapper = mapper;
     }
     
     [HttpPost]   
@@ -30,8 +35,7 @@ public class GameController : Controller
             
             return Ok(new CreateGameSuccessResponse()
             {
-                UUID = game.UUID,
-                GameMap = new int[3,3]
+                Game = _mapper.Map<Game, GameDTO>(game)
             });
         }
         catch (Exception ex)
@@ -60,8 +64,7 @@ public class GameController : Controller
             
             return Ok(new GetGameSuccessResponse()
             {
-                UUID = game.UUID,
-                GameMap = new int[3,3]
+                Game = _mapper.Map<Game, GameDTO>(game)
             });
         }
         catch (Exception ex)
@@ -76,8 +79,31 @@ public class GameController : Controller
     }
     
     [HttpPatch]   
-    public async Task<IActionResult> Patch()
+    public async Task<IActionResult> MakeAMove(Guid uuid)
     {
-        return Ok();
+        try
+        {
+            Game game = await _gameService.GetAsync(uuid);
+            
+            if (game == null)
+                return Ok(new GetGameErrorResponse()
+                {
+                    Error = GameMessages.GameNotFound
+                });
+            
+            return Ok(new MakeAMoveSuccessResponse()
+            {
+                Game = _mapper.Map<Game, GameDTO>(game)
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            
+            return StatusCode(500, new MakeAMoveErrorResponse()
+            {
+                Error = Errors.UnknownError
+            });
+        }
     }
 }

@@ -2,11 +2,9 @@
 
 public class GameMapField
 {
-    public Guid UUID { get; set; }
+    public int IndexX { get; set; }
     
-    public int IndexX { get; }
+    public int IndexY { get; set; }
     
-    public int IndexY { get; }
-    
-    public bool IsX { get; }
+    public bool IsX { get; set; }
 }

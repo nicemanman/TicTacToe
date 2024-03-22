@@ -28,7 +28,7 @@ public class UnitOfWork : BaseUnitOfWork, IUnitOfWork
     {
         modelBuilder.Entity<Game>().OwnsOne(x => x.GameMap, builder =>
         {
-            builder.OwnsMany(x => x.Map);
+            builder.OwnsMany(x => x.Fields);
         });
         modelBuilder.Entity<Game>().HasKey(x => x.UUID);
         modelBuilder.Entity<Game>()

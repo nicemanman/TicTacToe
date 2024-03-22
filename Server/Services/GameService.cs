@@ -17,15 +17,7 @@ public class GameService : IGameService
     {
         return await _unitOfWork.GamesRepository.CreateAsync(new Game()
         {
-            GameMap = new GameMap()
-            {
-                Map = new List<GameMapField>()
-                {
-                    new GameMapField(),
-                    new GameMapField(),
-                    new GameMapField(),
-                }
-            }
+            GameMap = new GameMap(3,3)
         });
     }
 

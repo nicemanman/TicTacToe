@@ -1,4 +1,6 @@
-﻿namespace Server.DTO;
+﻿using Localization.Game;
+
+namespace Server.DTO;
 
 public class CreateGameErrorResponse
 {
@@ -7,7 +9,5 @@ public class CreateGameErrorResponse
 
 public class CreateGameSuccessResponse 
 {
-    public Guid UUID { get; set; }
-    
-    public int[,] GameMap { get; set; }
+    public GameDTO Game { get; set; }
 }
