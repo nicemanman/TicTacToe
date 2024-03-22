@@ -1,11 +1,11 @@
 ﻿namespace Server.DTO;
 
-public class CreateGameErrorResponse
+public class GetGameErrorResponse
 {
     public string Error { get; set; }
 }
 
-public class CreateGameSuccessResponse 
+public class GetGameSuccessResponse 
 {
     public Guid UUID { get; set; }
     

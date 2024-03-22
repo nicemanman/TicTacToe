@@ -15,15 +15,17 @@ public interface IRepository<T>
     /// </summary>
     /// <remark>TTT-1</remark>
     /// <author>ilya.falko2013@gmail.com</author>
-    Task<T> ReadAsync(Guid uuid);
+    Task<T> GetAsync(Guid uuid);
     
     /// <summary>
     /// Получение сущностей по списку UUID-ов
     /// </summary>
     /// <remark>TTT-1</remark>
     /// <author>ilya.falko2013@gmail.com</author>
-    Task<IEnumerable<T>> ReadAsync(IEnumerable<Guid> uuids);
+    Task<IEnumerable<T>> GetAsync(IEnumerable<Guid> uuids);
 
+    Task<List<T>> GetAllAsync();
+    
     /// <summary>
     /// Создать сущность
     /// </summary>
@@ -53,6 +55,4 @@ public interface IRepository<T>
     Task<IEnumerable<T>> FindAsync(Filter? filter, string? orderBy, int? offset, int? count, bool? sortDescending);
 
     Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
-    
-    Task<List<T>> ReadAllAsync();
 }

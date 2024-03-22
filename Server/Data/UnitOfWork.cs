@@ -8,12 +8,14 @@ namespace Server.Data;
 
 public class UnitOfWork : BaseUnitOfWork, IUnitOfWork
 {
+    private readonly ILogger<UnitOfWork> _logger;
     public DbSet<Game> Games { get; set; }
     
     public IRepository<Game> GamesRepository { get; set; }
     
-    public UnitOfWork(IConfiguration configuration) : base(configuration)
+    public UnitOfWork(IConfiguration configuration, ILogger<UnitOfWork> logger) : base(configuration)
     {
+        _logger = logger;
         GamesRepository = new Repository<Game>(Games);
     }
 

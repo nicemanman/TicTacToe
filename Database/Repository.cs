@@ -65,13 +65,13 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
     /// </summary>
     /// <remark>CloudWMS-39</remark>
     /// <author>i.falko@axelot.ru</author>
-    public virtual async Task<T> ReadAsync(Guid uuid)
+    public virtual async Task<T> GetAsync(Guid uuid)
     {
         T? entity = await _dbSet.FirstOrDefaultAsync(u => u.UUID == uuid);
         return entity;
     }
     
-    public async Task<List<T>> ReadAllAsync()
+    public async Task<List<T>> GetAllAsync()
     {
         return _dbSet.ToList();
     }
@@ -81,7 +81,7 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
     /// </summary>
     /// <remark>CloudWMS-39</remark>
     /// <author>i.falko@axelot.ru</author>
-    public virtual async Task<IEnumerable<T>> ReadAsync(IEnumerable<Guid> uuids)
+    public virtual async Task<IEnumerable<T>> GetAsync(IEnumerable<Guid> uuids)
     {
         IEnumerable<T> entities = _dbSet.Where(w => uuids.Contains(w.UUID));
         return entities.ToList();

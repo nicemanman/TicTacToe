@@ -7,4 +7,6 @@ public interface IGameService
     public Task<Game> CreateAsync();
     
     Task<List<Game>> GetAllGamesAsync();
+    
+    Task<Game> GetAsync(Guid uuid);
 }

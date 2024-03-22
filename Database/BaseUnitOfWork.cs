@@ -20,9 +20,13 @@ public class BaseUnitOfWork : DbContext, IBaseUnitOfWork
     {
         ConnectionString = configuration.GetSection(DbConnectionOptions.ConnectionStringConfigString).Value;
         UseAutoMigration = configuration.GetSection(DbConnectionOptions.UseAutoMigrationConfigString).Get<bool>();
-        
+
         if (_logger.IsEnabled(LogLevel.Trace))
-            _logger.Log(LogLevel.Trace, $"New UnitOfWork with ContextId {ContextId} has been created");
+        {
+            _logger.Log(LogLevel.Trace, $"New UnitOfWork with ContextId {ContextId} has been created. " +
+                                        $"Connection string is set to {ConnectionString}, " +
+                                        $"Automigrations set to {UseAutoMigration}");
+        }
     }
 
 

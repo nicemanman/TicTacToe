@@ -31,6 +31,11 @@ public class GameService : IGameService
 
     public async Task<List<Game>> GetAllGamesAsync()
     {
-        return await _unitOfWork.GamesRepository.ReadAllAsync();
+        return await _unitOfWork.GamesRepository.GetAllAsync();
+    }
+
+    public async Task<Game> GetAsync(Guid uuid)
+    {
+        return await _unitOfWork.GamesRepository.GetAsync(uuid);
     }
 }
