@@ -2,10 +2,11 @@
 using Localization.Common;
 using Localization.Game;
 using Microsoft.AspNetCore.Mvc;
-using Server.DataModel;
 using Server.DTO;
 using Server.Services;
 using Server.Services.Interfaces;
+using TicTacToeAI.DataModel;
+using Game = Server.DataModel.Game;
 
 namespace Server.Controllers;
 
@@ -32,10 +33,11 @@ public class GameController : Controller
         try
         {
             var game = await _gameService.CreateAsync();
+            var gameDto = _mapper.Map<Game, GameDTO>(game);
             
             return Ok(new CreateGameSuccessResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(game)
+                Game = gameDto
             });
         }
         catch (Exception ex)
@@ -79,7 +81,7 @@ public class GameController : Controller
     }
     
     [HttpPatch]   
-    public async Task<IActionResult> MakeAMove(Guid uuid)
+    public async Task<IActionResult> MakeAMove(Guid uuid, int row, int column)
     {
         try
         {
@@ -90,10 +92,18 @@ public class GameController : Controller
                 {
                     Error = GameMessages.GameNotFound
                 });
+
+            var result = await _gameService.MakeAMoveAsync(game, row, column);
+            
+            if (!string.IsNullOrWhiteSpace(result.Message))
+                return Ok(new MakeAMoveGameIsFinishedResponse()
+                {
+                    Message = result.Message
+                });
             
             return Ok(new MakeAMoveSuccessResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(game)
+                Game = _mapper.Map<Game, GameDTO>(result.Game)
             });
         }
         catch (Exception ex)

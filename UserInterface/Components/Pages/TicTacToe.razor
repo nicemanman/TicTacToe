@@ -1,0 +1,74 @@
+﻿@page "/"
+@inject IJSRuntime JS
+<PageTitle>Крестики-нолики</PageTitle>
+
+<div>
+    <div class="board">
+        @for(int i=0; i < 3; i++)
+        {
+            int row = i;
+            for (int j = 0; j < 3; j++)
+            {
+                int col = j;
+                <div class="square" @onclick="()=> SqaureClicked(row, col)">
+                    <h5 class="char">@Board[row, col]</h5>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    //Получить игру по переданному UUID
+    char[,] Board = { { ' ', ' ', ' ' }, { ' ', ' ', ' ' }, { ' ', ' ', ' ' } };
+    char Player = 'x';
+    
+    private async Task SqaureClicked(int row, int col)
+    {
+        if (Board[row, col] != ' ') 
+            return;
+        
+        Board[row, col] = Player;
+
+        await JS.InvokeVoidAsync("ShowWinnerAlert", "Player");
+
+        if (IsGameReset())
+        {
+            await JS.InvokeVoidAsync("ShowTieAlert");
+            ResetGame();
+        }
+    }
+    
+    private bool IsGameReset()
+    {
+        bool isReset = true;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if(Board[i, j] == ' ')
+                {
+                    isReset = false;
+                }
+            }
+        }
+        return isReset;
+    }
+
+    private void ResetGame()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                Board[i, j] = ' ';
+            }
+        }
+    }
+}

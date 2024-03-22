@@ -35,6 +35,12 @@ public class UnitOfWork : BaseUnitOfWork, IUnitOfWork
             .Property(x => x.UUID)
             .ValueGeneratedOnAdd();
         
+        modelBuilder.Entity<Game>()
+            .Property(x=>x.State)
+            .HasConversion(
+                v => v.ToString(),
+                v => (GameState)Enum.Parse(typeof(GameState), v));
+        
         base.OnModelCreating(modelBuilder);
     }
 }

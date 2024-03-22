@@ -18,9 +18,9 @@ public class GameMap
             {
                 Fields.Add(new GameMapField()
                 {
-                    IndexX = w,
-                    IndexY = h,
-                    IsX = false
+                    Row = w,
+                    Column = h,
+                    Char = ""
                 });
             }
         }

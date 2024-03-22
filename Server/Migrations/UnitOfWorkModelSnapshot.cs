@@ -28,6 +28,10 @@ namespace Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("UUID");
 
                     b.ToTable("Games");
@@ -58,14 +62,15 @@ namespace Server.Migrations
 
                                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
 
-                                    b2.Property<int>("IndexX")
+                                    b2.Property<string>("Char")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<int>("Column")
                                         .HasColumnType("integer");
 
-                                    b2.Property<int>("IndexY")
+                                    b2.Property<int>("Row")
                                         .HasColumnType("integer");
-
-                                    b2.Property<bool>("IsX")
-                                        .HasColumnType("boolean");
 
                                     b2.HasKey("GameMapGameUUID", "Id");
 

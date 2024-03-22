@@ -2,9 +2,9 @@
 
 public class GameMapField
 {
-    public int IndexX { get; set; }
+    public int Row { get; set; }
     
-    public int IndexY { get; set; }
+    public int Column { get; set; }
     
-    public bool IsX { get; set; }
+    public string Char { get; set; }
 }

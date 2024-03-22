@@ -9,3 +9,8 @@ public class MakeAMoveSuccessResponse
 {
     public GameDTO Game { get; set; }
 }
+
+public class MakeAMoveGameIsFinishedResponse
+{
+    public string Message { get; set; }
+}

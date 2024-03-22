@@ -1,8 +1,21 @@
 ﻿services:
+  ui:
+    image: tic-tac-toe-ui
+    ports:
+      - '5001:8080'
+    networks:
+      - tictactoe-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    build:
+      context: .
+      dockerfile: UserInterface/Dockerfile
+      
   server:
     image: tic-tac-toe-server
     ports:
       - '5000:8080'
+    hostname: tictactoe-server
     networks:
       - tictactoe-network
     environment:

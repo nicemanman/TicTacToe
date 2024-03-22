@@ -32,6 +32,11 @@
     <ItemGroup>
       <ProjectReference Include="..\Database\Database.csproj" />
       <ProjectReference Include="..\Localization\Localization.csproj" />
+      <ProjectReference Include="..\TicTacToeAI\TicTacToeAI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Exceptions\" />
     </ItemGroup>
 
 </Project>

@@ -13,4 +13,6 @@ public interface IBaseUnitOfWork : IDisposable
     public void RollbackTransaction();
 
     public void CommitTransaction();
+
+    public void Migrate();
 }

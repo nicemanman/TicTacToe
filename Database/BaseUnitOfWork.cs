@@ -73,6 +73,11 @@ public class BaseUnitOfWork : DbContext, IBaseUnitOfWork
             _logger.Log(LogLevel.Trace, $"UnitOfWork with ContextId {ContextId} has commited transaction {currentTransactionId}");
     }
 
+    public void Migrate()
+    {
+        Database.Migrate();
+    }
+
     public override void Dispose()
     {
         _isDisposed = true;

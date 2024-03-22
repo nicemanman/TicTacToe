@@ -1,7 +1,9 @@
 using System.Net;
+using Database.DTO;
 using Database.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Database.Middlewares;
 
@@ -49,6 +51,7 @@ public class DatabaseTransactionMiddleware : IMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex.Message, ex);
+            _logger.LogError(ex.InnerException?.Message, ex.InnerException);
             _unitOfWork.RollbackTransaction();
             await HandleExceptionAsync(context, ex);
         }
@@ -64,7 +67,10 @@ public class DatabaseTransactionMiddleware : IMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        string errorMessage = "Возникла ошибка при коммите транзакции";
+        string errorMessage = JsonConvert.SerializeObject(new TransactionCommitErrorResponse()
+        {
+            Error = "Произошла ошибка при коммите транзакции"
+        });
         
         context.Response.Clear();
         context.Response.ContentType = "text/plain; charset=utf-8";
