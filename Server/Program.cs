@@ -1,3 +1,13 @@
+using Database.Extensions;
+using NLog.Extensions.Logging;
+using Server.AI;
+using Server.Data;
+using Server.Data.Interfaces;
+using Server.Services;
+using Server.Services.Interfaces;
+using TicTacToeAI.AI;
+using TicTacToeAI.AI.Interfaces;
+
 namespace Server;
 
 public class Program
@@ -8,13 +18,31 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
-
+        builder.Services.AddAutoMapper(typeof(Program).Assembly);
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
+        builder.Services.AddControllers();
+        builder.Services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddNLog();
+        });
+        builder.Services.AddUnitOfWork<IUnitOfWork, UnitOfWork>(builder.Configuration);
+        builder.Services.AddScoped<IGameService, GameService>();
+        builder.Services.AddScoped<IOpponentManager, AiManager>();
+        builder.Services.AddScoped<IBot, SimpleBot>();
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddSession();
+        
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            db.Migrate();
+        }
+        
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -23,28 +51,9 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-            {
-                var forecast = Enumerable.Range(1, 5).Select(index =>
-                        new WeatherForecast
-                        {
-                            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                            TemperatureC = Random.Shared.Next(-20, 55),
-                            Summary = summaries[Random.Shared.Next(summaries.Length)]
-                        })
-                    .ToArray();
-                return forecast;
-            })
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
+        app.UseTransaction();
+        app.UseSession();
+        app.MapControllers();
 
         app.Run();
     }

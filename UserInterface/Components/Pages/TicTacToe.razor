@@ -1,0 +1,57 @@
+﻿@page "/tictactoe"
+@using UserInterface.DTO
+@using UserInterface.Services
+@inject GameService GameService
+@inject NavigationManager NavigationManager
+@if (_gameResponse != null && _gameResponse.Game != null)
+{
+    <div>
+        @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
+        {
+            <div class="game-row">
+                @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys)
+                {
+                    <button @onclick="@(async () => await MakeMove(int.Parse(rowKey), int.Parse(columnKey)))">@_gameResponse.Game.GameMap[rowKey][columnKey]</button>
+                }
+            </div>
+        }
+    </div>
+}
+else if (_gameResponse?.Error != null)
+{
+    <div>@_gameResponse.Error</div>
+}
+
+@if (_gameResponse != null && !string.IsNullOrEmpty(_gameResponse.Message) && _gameResponse.Game == null)
+{
+    <div>
+        <span>@_gameResponse.Message</span>
+        <button @onclick="StartOver">OK</button>
+    </div>
+}
+
+@code {
+    private GameResponse _gameResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _gameResponse = await GameService.GetGame(); // Попробуйте получить текущую игру при инициализации
+    }
+
+    private async Task MakeMove(int row, int column)
+    {
+        var response = await GameService.MakeMove(row, column);
+        //TODO: не обрабатываем ошибки тут
+        if (response.Game == null && response.Error != null)
+            return;
+
+        _gameResponse.Game = response.Game;
+        _gameResponse.Message = response.Message;
+    }
+
+    private void StartOver()
+    {
+        _gameResponse = null;
+        NavigationManager.NavigateTo("/");
+    }
+}
