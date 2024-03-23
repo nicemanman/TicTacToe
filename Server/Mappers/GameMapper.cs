@@ -19,15 +19,15 @@ public class GameMapper : Profile
             });
         
         CreateMap<Game, AIGame>()
-            .ForMember(x => x.Board, expression =>
+            .ForMember(dst => dst.Board, expression =>
             {
-                expression.MapFrom(x=> MapFieldsToGameBoard(x.GameMap.Fields));
+                expression.MapFrom(src=> MapFieldsToGameBoard(src.GameMap.Fields));
             });
         
         CreateMap<AIGame, Game>()
-            .ForMember(x => x.GameMap, expression =>
+            .ForMember(dst => dst.GameMap, expression =>
             {
-                expression.MapFrom(x=> MapGameBoardToGameMap(x.Board));
+                expression.Ignore();
             });
     }
 

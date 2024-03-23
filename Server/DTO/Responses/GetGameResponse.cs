@@ -1,4 +1,4 @@
-﻿namespace Server.DTO;
+﻿namespace Server.DTO.Responses;
 
 public class GetGameErrorResponse
 {
@@ -8,4 +8,6 @@ public class GetGameErrorResponse
 public class GetGameSuccessResponse 
 {
     public GameDTO Game { get; set; }
+    
+    public string Message { get; set; }
 }

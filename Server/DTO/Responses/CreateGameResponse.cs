@@ -1,6 +1,4 @@
-﻿using Localization.Game;
-
-namespace Server.DTO;
+﻿namespace Server.DTO.Responses;
 
 public class CreateGameErrorResponse
 {
@@ -10,4 +8,6 @@ public class CreateGameErrorResponse
 public class CreateGameSuccessResponse 
 {
     public GameDTO Game { get; set; }
+    
+    public string Message { get; set; }
 }

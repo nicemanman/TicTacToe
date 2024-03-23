@@ -7,7 +7,7 @@ using Game = Server.DataModel.Game;
 
 namespace Server.AI;
 
-public class AiManager : IAiManager
+public class AiManager : IOpponentManager
 {
     private readonly IMapper _mapper;
     private readonly IBot _bot;
@@ -22,6 +22,15 @@ public class AiManager : IAiManager
     {
         AIGame aiGame = _mapper.Map<Game, AIGame>(game);
         _bot.MakeMove(aiGame);
-        return _mapper.Map<AIGame, Game>(aiGame);
+        _mapper.Map(aiGame, game);
+
+        //TODO: если мапить поля через автомаппер, то теряется значение ShadowProperty GameMapField.Id, пока костыльнул, потом поправлю
+        foreach (var cell in aiGame.Board.GetCells())
+        {
+            var field = game.GameMap.Fields.FirstOrDefault(x => x.Row == cell.Row && x.Column == cell.Column);
+            field.Char = cell.Char;
+        }
+        
+        return game;
     }
 }

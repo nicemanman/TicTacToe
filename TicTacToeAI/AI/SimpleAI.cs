@@ -2,7 +2,7 @@
 using TicTacToeAI.DataModel;
 using TicTacToeAI.DataModel.Interfaces;
 
-namespace TicTacToeAI.Algorithms;
+namespace TicTacToeAI.AI;
 
 public class SimpleAI : IAI
 {

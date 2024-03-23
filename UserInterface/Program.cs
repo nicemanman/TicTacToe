@@ -1,4 +1,6 @@
+using NLog.Extensions.Logging;
 using UserInterface.Components;
+using UserInterface.Services;
 
 namespace UserInterface;
 
@@ -11,11 +13,26 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.Services.AddScoped(sp =>
-            new HttpClient
+        builder.Services.AddLogging(x =>
+        {
+            x.ClearProviders();
+            x.AddNLog();
+        });
+        
+        builder.Services.AddHttpClient("MyClient", client =>
             {
-                BaseAddress = new Uri(builder.Configuration.GetConnectionString("TicTacToeServer"))
+                client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("TicTacToeServer"));
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientHandler
+                {
+                    UseCookies = true,
+                    CookieContainer = new System.Net.CookieContainer()
+                };
             });
+        
+        builder.Services.AddScoped<GameService>();
         
         var app = builder.Build();
 

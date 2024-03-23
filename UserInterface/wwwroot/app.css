@@ -49,3 +49,35 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.game-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.game-row button {
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    font-size: 24px;
+    background-color: white;
+    border: 2px solid #4CAF50; /* Придает зеленый цвет границам */
+    border-radius: 10px; /* Скругление углов кнопок */
+}
+
+.game-row button:hover {
+    background-color: #f5f5f5; /* Светло-серый фон при наведении */
+}
+
+.game-board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-message {
+    text-align: center;
+    font-size: 24px;
+    margin-top: 20px;
+}

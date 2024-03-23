@@ -1,0 +1,42 @@
+﻿@page "/"
+@using UserInterface.Services
+@inject GameService GameService
+@inject NavigationManager NavigationManager
+@inject ILogger<GameService> Logger
+
+<button @onclick="StartNewGame">Начать новую игру</button>
+<button @onclick="ContinueGame">Продолжить предыдущую игру</button>
+
+@if (_startNewGame)
+{
+    <div>
+        <span>Хотите ли вы ходить первым?</span>
+        <button @onclick="async () => await CreateGame(true)">Да</button>
+        <button @onclick="async () => await CreateGame(false)">Нет</button>
+    </div>
+}
+
+@code {
+    private bool _startNewGame;
+
+    private void StartNewGame()
+    {
+        _startNewGame = true;
+    }
+
+    private void ContinueGame()
+    {
+        Logger.LogDebug("Hello");
+        _startNewGame = false;
+        // Здесь мы перенаправляем пользователя на компонент игры, который автоматически попытается загрузить текущую игру
+        NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+    }
+
+    private async Task CreateGame(bool playerFirst)
+    {
+        _startNewGame = false;
+        await GameService.CreateGame(playerFirst);
+        // После создания новой игры перенаправляем пользователя на компонент игры
+        NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+    }
+}

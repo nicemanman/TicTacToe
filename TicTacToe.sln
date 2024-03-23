@@ -8,7 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Databa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{027F3527-537B-472F-A124-79D5517E167F}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yml = docker-compose.yml
+		docker-compose.Production.yml = docker-compose.Production.yml
+		docker-compose.Develop.yml = docker-compose.Develop.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localization", "Localization\Localization.csproj", "{414B8B98-E8CA-4586-A48B-27014732DBAA}"

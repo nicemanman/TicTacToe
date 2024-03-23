@@ -69,11 +69,65 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Не удалось найти игру с переданным идентификатором, попробуйте позже.
+        ///   Looks up a localized string similar to Результат матча - победил бот.
+        /// </summary>
+        public static string GameFinished_BotWin {
+            get {
+                return ResourceManager.GetString("GameFinished.BotWin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Результат матча - ничья.
+        /// </summary>
+        public static string GameFinished_ItsATie {
+            get {
+                return ResourceManager.GetString("GameFinished.ItsATie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Результат матча - победил игрок.
+        /// </summary>
+        public static string GameFinished_PlayerWin {
+            get {
+                return ResourceManager.GetString("GameFinished.PlayerWin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Не удалось найти игру, попробуйте позже или создайте новую.
         /// </summary>
         public static string GameNotFound {
             get {
                 return ResourceManager.GetString("GameNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Выбор в этом поле уже сделан.
+        /// </summary>
+        public static string UnableToSetCell_AlreadySet {
+            get {
+                return ResourceManager.GetString("UnableToSetCell.AlreadySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Поле отсутствует на этой карте.
+        /// </summary>
+        public static string UnableToSetCell_UnknownCell {
+            get {
+                return ResourceManager.GetString("UnableToSetCell.UnknownCell", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ваш ход.
+        /// </summary>
+        public static string YourTurn {
+            get {
+                return ResourceManager.GetString("YourTurn", resourceCulture);
             }
         }
     }

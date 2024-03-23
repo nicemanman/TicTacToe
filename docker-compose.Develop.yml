@@ -1,0 +1,45 @@
+﻿services:
+  ui:
+    image: tic-tac-toe-ui
+    ports:
+      - '5001:8080'
+    networks:
+      - tictactoe-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    build:
+      context: .
+      dockerfile: UserInterface/Dockerfile
+      
+  server:
+    image: tic-tac-toe-server
+    ports:
+      - '5000:8080'
+    hostname: server
+    networks:
+      - tictactoe-network
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    build:
+      context: .
+      dockerfile: Server/Dockerfile
+
+  db:
+    image: postgres
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - tictactoe-network
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      
+volumes:
+  db:
+    driver: local
+    
+networks:
+  tictactoe-network:

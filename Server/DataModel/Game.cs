@@ -9,7 +9,7 @@ public class Game : IEntity
     
     public GameMap GameMap { get; set; }
 
-    public GameState State { get; set; }
+    public GameState State { get; set; } = GameState.InProgress;
 
     public bool IsFinished => State is GameState.Tie or GameState.BotWin or GameState.PlayerWin;
 }

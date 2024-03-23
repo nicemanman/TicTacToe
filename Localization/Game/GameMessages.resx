@@ -22,6 +22,24 @@
         <value>Не удалось начать игру, попробуйте позже</value>
     </data>
     <data name="GameNotFound" xml:space="preserve">
-        <value>Не удалось найти игру с переданным идентификатором, попробуйте позже</value>
+        <value>Не удалось найти игру, попробуйте позже или создайте новую</value>
+    </data>
+    <data name="YourTurn" xml:space="preserve">
+        <value>Ваш ход</value>
+    </data>
+    <data name="UnableToSetCell.UnknownCell" xml:space="preserve">
+        <value>Поле отсутствует на этой карте</value>
+    </data>
+    <data name="UnableToSetCell.AlreadySet" xml:space="preserve">
+        <value>Выбор в этом поле уже сделан</value>
+    </data>
+    <data name="GameFinished.ItsATie" xml:space="preserve">
+        <value>Результат матча - ничья</value>
+    </data>
+    <data name="GameFinished.PlayerWin" xml:space="preserve">
+        <value>Результат матча - победил игрок</value>
+    </data>
+    <data name="GameFinished.BotWin" xml:space="preserve">
+        <value>Результат матча - победил бот</value>
     </data>
 </root>

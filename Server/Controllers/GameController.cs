@@ -3,6 +3,8 @@ using Localization.Common;
 using Localization.Game;
 using Microsoft.AspNetCore.Mvc;
 using Server.DTO;
+using Server.DTO.Responses;
+using Server.DTO.Results;
 using Server.Services;
 using Server.Services.Interfaces;
 using TicTacToeAI.DataModel;
@@ -14,6 +16,8 @@ namespace Server.Controllers;
 [Route("api/[controller]")]
 public class GameController : Controller
 {
+    private const string _currentGameToken = "CURRENT_GAME_TOKEN";
+    
     private readonly IGameService _gameService;
     private readonly ILogger<GameController> _logger;
     private readonly IMapper _mapper;
@@ -28,16 +32,17 @@ public class GameController : Controller
     }
     
     [HttpPost]   
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(bool playerFirst = false)
     {
         try
         {
-            var game = await _gameService.CreateAsync();
-            var gameDto = _mapper.Map<Game, GameDTO>(game);
-            
+            var result = await _gameService.CreateAsync(playerFirst);
+            var gameDto = _mapper.Map<Game, GameDTO>(result.Game);
+            SetGameTokenToSession(result.Game);
             return Ok(new CreateGameSuccessResponse()
             {
-                Game = gameDto
+                Game = gameDto,
+                Message = result.Message
             });
         }
         catch (Exception ex)
@@ -52,21 +57,22 @@ public class GameController : Controller
     }
     
     [HttpGet]   
-    public async Task<IActionResult> Get(Guid uuid)
+    public async Task<IActionResult> Get()
     {
         try
         {
-            Game game = await _gameService.GetAsync(uuid);
+            GetGameResult result = await _gameService.GetAsync(GetGameTokenFromSession());
             
-            if (game == null)
+            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
                 return Ok(new GetGameErrorResponse()
                 {
-                    Error = GameMessages.GameNotFound
+                    Error = result.ErrorMessage
                 });
             
             return Ok(new GetGameSuccessResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(game)
+                Game = _mapper.Map<Game, GameDTO>(result.Game),
+                Message = result.Message
             });
         }
         catch (Exception ex)
@@ -79,31 +85,41 @@ public class GameController : Controller
             });
         }
     }
-    
+
     [HttpPatch]   
-    public async Task<IActionResult> MakeAMove(Guid uuid, int row, int column)
+    public async Task<IActionResult> MakeAMove(int row, int column)
     {
         try
         {
-            Game game = await _gameService.GetAsync(uuid);
+            GetGameResult getResult = await _gameService.GetAsync(GetGameTokenFromSession());
             
-            if (game == null)
+            if (!string.IsNullOrWhiteSpace(getResult.ErrorMessage))
                 return Ok(new GetGameErrorResponse()
                 {
-                    Error = GameMessages.GameNotFound
+                    Error = getResult.ErrorMessage
                 });
 
-            var result = await _gameService.MakeAMoveAsync(game, row, column);
+            MakeAMoveResult makeAMoveResult = await _gameService.MakeAMoveAsync(getResult.Game, row, column);
             
-            if (!string.IsNullOrWhiteSpace(result.Message))
+            if (!string.IsNullOrWhiteSpace(makeAMoveResult.ErrorMessage))
+                return Ok(new MakeAMoveErrorResponse()
+                {
+                    Error = makeAMoveResult.ErrorMessage
+                });
+
+            if (makeAMoveResult.GameIsFinished)
+            {
+                RemoveGameTokenFromSession();
                 return Ok(new MakeAMoveGameIsFinishedResponse()
                 {
-                    Message = result.Message
+                    Message = makeAMoveResult.Message
                 });
+            }
+                
             
             return Ok(new MakeAMoveSuccessResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(result.Game)
+                Game = _mapper.Map<Game, GameDTO>(makeAMoveResult.Game)
             });
         }
         catch (Exception ex)
@@ -115,5 +131,25 @@ public class GameController : Controller
                 Error = Errors.UnknownError
             });
         }
+    }
+    
+    private Guid GetGameTokenFromSession()
+    {
+        string token = HttpContext.Session.GetString(_currentGameToken);
+        
+        if (string.IsNullOrWhiteSpace(token))
+            return Guid.Empty;
+        
+        return new Guid(token);
+    }
+    
+    private void SetGameTokenToSession(Game game)
+    {
+        HttpContext.Session.SetString(_currentGameToken, game.UUID.ToString());
+    }
+    
+    private void RemoveGameTokenFromSession()
+    {
+        HttpContext.Session.Remove(_currentGameToken);
     }
 }

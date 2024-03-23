@@ -94,8 +94,7 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
     /// <author>i.falko@axelot.ru</author>
     public virtual async Task<T> UpdateAsync(T entity)
     {
-        _dbSet.Detach(entity);
-        EntityEntry<T> customer = _dbSet.Update(entity);
-        return customer.Entity;
+        EntityEntry<T> updatedEntity = _dbSet.Update(entity);
+        return updatedEntity.Entity;
     }
 }

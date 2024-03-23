@@ -1,5 +1,4 @@
 ﻿using TicTacToeAI.AI.Interfaces;
-using TicTacToeAI.Algorithms;
 using TicTacToeAI.DataModel;
 using TicTacToeAI.DataModel.Interfaces;
 

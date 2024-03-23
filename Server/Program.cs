@@ -30,8 +30,10 @@ public class Program
         });
         builder.Services.AddUnitOfWork<IUnitOfWork, UnitOfWork>(builder.Configuration);
         builder.Services.AddScoped<IGameService, GameService>();
-        builder.Services.AddScoped<IAiManager, AiManager>();
+        builder.Services.AddScoped<IOpponentManager, AiManager>();
         builder.Services.AddScoped<IBot, SimpleBot>();
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddSession();
         
         var app = builder.Build();
 
@@ -50,6 +52,7 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseTransaction();
+        app.UseSession();
         app.MapControllers();
 
         app.Run();

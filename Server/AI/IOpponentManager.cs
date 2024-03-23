@@ -2,7 +2,7 @@
 
 namespace Server.AI;
 
-public interface IAiManager
+public interface IOpponentManager
 {
     public Game MakeMove(Game game);
 }

@@ -13,9 +13,7 @@
       
   server:
     image: tic-tac-toe-server
-    ports:
-      - '5000:8080'
-    hostname: tictactoe-server
+    hostname: server
     networks:
       - tictactoe-network
     environment:
@@ -32,8 +30,6 @@
       - POSTGRES_PASSWORD=postgres
     networks:
       - tictactoe-network
-    ports:
-      - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
       

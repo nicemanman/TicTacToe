@@ -50,22 +50,6 @@ public class Board : IBoard
         return board[row, col] == _empty;
     }
 
-    public bool IsPlayer(int row, int col)
-    {
-        if (row < 0 || col < 0)
-            return false;
-        
-        return board[row, col] == _player;
-    }
-
-    public bool IsOpponent(int row, int col)
-    {
-        if (row < 0 || col < 0)
-            return false;
-        
-        return board[row, col] == _opponent;
-    }
-
     public int GetCurrentScore()
     {
         //Проверить строки

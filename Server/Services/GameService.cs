@@ -1,7 +1,10 @@
-﻿using Server.AI;
+﻿using System.Security.Cryptography;
+using Localization.Game;
+using Server.AI;
 using Server.Data.Interfaces;
 using Server.DataModel;
 using Server.DTO;
+using Server.DTO.Results;
 using Server.Services.Interfaces;
 using TicTacToeAI.DataModel;
 using Game = Server.DataModel.Game;
@@ -12,34 +15,63 @@ namespace Server.Services;
 public class GameService : IGameService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IAiManager _aiManager;
+    private readonly IOpponentManager _opponentManager;
     
-    public GameService(IUnitOfWork unitOfWork, IAiManager aiManager)
+    public GameService(IUnitOfWork unitOfWork, IOpponentManager opponentManager)
     {
         _unitOfWork = unitOfWork;
-        _aiManager = aiManager;
+        _opponentManager = opponentManager;
     }
 
-    public async Task<Game> CreateAsync()
+    public async Task<CreateGameResult> CreateAsync(bool playerFirst)
     {
         Game game = new Game()
         {
             GameMap = new GameMap(3,3)
         };
         
-        game = _aiManager.MakeMove(game);
+        if (!playerFirst)
+            game = _opponentManager.MakeMove(game);
+        
         game = await _unitOfWork.GamesRepository.CreateAsync(game);
-        return game;
+        
+        CreateGameResult result = new()
+        {
+            Game = game,
+            Message = GameMessages.YourTurn
+        };
+        
+        return result;
     }
 
-    public async Task<List<Game>> GetAllGamesAsync()
+    public async Task<GetGameResult> GetAsync(Guid uuid)
     {
-        return await _unitOfWork.GamesRepository.GetAllAsync();
-    }
+        var game = await _unitOfWork.GamesRepository.GetAsync(uuid);
 
-    public async Task<Game> GetAsync(Guid uuid)
-    {
-        return await _unitOfWork.GamesRepository.GetAsync(uuid);
+        if (game == null)
+            return new GetGameResult()
+            {
+                ErrorMessage = GameMessages.GameNotFound
+            };
+        
+        string message = string.Empty;
+        
+        if (game.State == GameState.Tie) 
+            message = GameMessages.GameFinished_ItsATie;
+        
+        if (game.State == GameState.PlayerWin) 
+            message = GameMessages.GameFinished_PlayerWin;
+        
+        if (game.State == GameState.BotWin) 
+            message = GameMessages.GameFinished_BotWin;
+        
+        GetGameResult result = new()
+        {
+            Game = game,
+            Message = message
+        };
+
+        return result;
     }
 
     public async Task<MakeAMoveResult> MakeAMoveAsync(Game game, int row, int column)
@@ -47,35 +79,61 @@ public class GameService : IGameService
         var field = game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
 
         if (field == null)
-            throw new Exception($"Невозможно установить выбор в поле {row}:{column}: поле с таким индексом отсутствует");
-        
+            return new MakeAMoveResult()
+            {
+                ErrorMessage = GameMessages.UnableToSetCell_UnknownCell
+            };
+
         if (!string.IsNullOrWhiteSpace(field.Char))
-            throw new Exception($"Невозможно установить выбор в поле {row}:{column}: выбор в этом поле уже сделан");
+            return new MakeAMoveResult()
+            {
+                ErrorMessage = GameMessages.UnableToSetCell_AlreadySet
+            };
         
         //TODO: не стоит хардкодить, времени мало, потом можно будет доделать
         field.Char = "X";
         
-        game = _aiManager.MakeMove(game);
+        game = _opponentManager.MakeMove(game);
+        game = await _unitOfWork.GamesRepository.UpdateAsync(game);
+        
+        if (!TryGetWinnerMessage(game, out string message))
+            return new MakeAMoveResult()
+            {
+                Game = game
+            };
 
-        MakeAMoveResult result = new MakeAMoveResult()
+        return new MakeAMoveResult()
         {
-            Game = game
+            Game = game,
+            Message = message
         };
+    }
 
-        await _unitOfWork.GamesRepository.UpdateAsync(game);
+    private static bool TryGetWinnerMessage(Game game, out string message)
+    {
+        message = string.Empty;
         
         if (!game.IsFinished)
-            return result;
-
-        if (game.State == GameState.Tie) 
-            result.Message = "Результат матча - ничья";
+            return false;
         
-        if (game.State == GameState.PlayerWin) 
-            result.Message = "Результат матча - побебил игрок";
+        if (game.State == GameState.Tie)
+        {
+            message = GameMessages.GameFinished_ItsATie;
+            return true;
+        }
         
-        if (game.State == GameState.BotWin) 
-            result.Message = "Результат матча - побебил бот";
+        if (game.State == GameState.PlayerWin)
+        {
+            message = GameMessages.GameFinished_PlayerWin;
+            return true;
+        }
+        
+        if (game.State == GameState.BotWin)
+        {
+            message = GameMessages.GameFinished_BotWin;
+            return true;
+        }
 
-        return result;
+        return false;
     }
 }

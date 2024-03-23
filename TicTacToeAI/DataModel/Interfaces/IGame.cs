@@ -1,6 +1,4 @@
-﻿using TicTacToeAI.DataModel.Interfaces;
-
-namespace TicTacToeAI.DataModel;
+﻿namespace TicTacToeAI.DataModel.Interfaces;
 
 public interface IGame
 {

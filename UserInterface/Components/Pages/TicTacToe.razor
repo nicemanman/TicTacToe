@@ -1,74 +1,57 @@
-﻿@page "/"
-@inject IJSRuntime JS
-<PageTitle>Крестики-нолики</PageTitle>
-
-<div>
-    <div class="board">
-        @for(int i=0; i < 3; i++)
+﻿@page "/tictactoe"
+@using UserInterface.DTO
+@using UserInterface.Services
+@inject GameService GameService
+@inject NavigationManager NavigationManager
+@if (_gameResponse != null && _gameResponse.Game != null)
+{
+    <div>
+        @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
         {
-            int row = i;
-            for (int j = 0; j < 3; j++)
-            {
-                int col = j;
-                <div class="square" @onclick="()=> SqaureClicked(row, col)">
-                    <h5 class="char">@Board[row, col]</h5>
-                </div>
-            }
+            <div class="game-row">
+                @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys)
+                {
+                    <button @onclick="@(async () => await MakeMove(int.Parse(rowKey), int.Parse(columnKey)))">@_gameResponse.Game.GameMap[rowKey][columnKey]</button>
+                }
+            </div>
         }
     </div>
-</div>
+}
+else if (_gameResponse?.Error != null)
+{
+    <div>@_gameResponse.Error</div>
+}
+
+@if (_gameResponse != null && !string.IsNullOrEmpty(_gameResponse.Message) && _gameResponse.Game == null)
+{
+    <div>
+        <span>@_gameResponse.Message</span>
+        <button @onclick="StartOver">OK</button>
+    </div>
+}
 
 @code {
+    private GameResponse _gameResponse;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        _gameResponse = await GameService.GetGame(); // Попробуйте получить текущую игру при инициализации
     }
 
-    //Получить игру по переданному UUID
-    char[,] Board = { { ' ', ' ', ' ' }, { ' ', ' ', ' ' }, { ' ', ' ', ' ' } };
-    char Player = 'x';
-    
-    private async Task SqaureClicked(int row, int col)
+    private async Task MakeMove(int row, int column)
     {
-        if (Board[row, col] != ' ') 
+        var response = await GameService.MakeMove(row, column);
+        //TODO: не обрабатываем ошибки тут
+        if (response.Game == null && response.Error != null)
             return;
-        
-        Board[row, col] = Player;
 
-        await JS.InvokeVoidAsync("ShowWinnerAlert", "Player");
-
-        if (IsGameReset())
-        {
-            await JS.InvokeVoidAsync("ShowTieAlert");
-            ResetGame();
-        }
-    }
-    
-    private bool IsGameReset()
-    {
-        bool isReset = true;
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if(Board[i, j] == ' ')
-                {
-                    isReset = false;
-                }
-            }
-        }
-        return isReset;
+        _gameResponse.Game = response.Game;
+        _gameResponse.Message = response.Message;
     }
 
-    private void ResetGame()
+    private void StartOver()
     {
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                Board[i, j] = ' ';
-            }
-        }
+        _gameResponse = null;
+        NavigationManager.NavigateTo("/");
     }
 }

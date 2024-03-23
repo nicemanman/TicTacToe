@@ -1,15 +1,14 @@
 ﻿using Server.DataModel;
 using Server.DTO;
+using Server.DTO.Results;
 
 namespace Server.Services.Interfaces;
 
 public interface IGameService
 {
-    public Task<Game> CreateAsync();
+    public Task<CreateGameResult> CreateAsync(bool playerFirst);
     
-    Task<List<Game>> GetAllGamesAsync();
-    
-    Task<Game> GetAsync(Guid uuid);
+    Task<GetGameResult> GetAsync(Guid uuid);
     
     Task<MakeAMoveResult> MakeAMoveAsync(Game game, int row, int column);
 }
