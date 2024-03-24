@@ -1,6 +1,6 @@
 # TicTacToe Project
 
-This is the TicTacToe project, an implementation using ASP.NET Core for educational and development purposes. Follow the instructions below to set up the project in your development environment with or without Docker.
+This is the TicTacToe project, a web implementation using ASP.NET Core for educational and development purposes. Follow the instructions below to set up the project in your development environment with or without Docker.
 
 ## Getting Started
 
