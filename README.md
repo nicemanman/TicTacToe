@@ -59,7 +59,14 @@ These instructions will get your copy of the project up and running on your loca
 
 ### Installation with Docker
 
-1. **Start Development Environment**
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/nicemanman/TicTacToe
+   cd TicTacToe
+   ```
+   
+2. **Start Development Environment**
 
    To start the environment with open server ports for debugging:
 
@@ -69,7 +76,7 @@ These instructions will get your copy of the project up and running on your loca
 
    This will start both backend and frontend services with the backend server accessible for debugging.
 
-2. **Start Production Environment**
+3. **Start Production Environment**
 
    To deploy the environment without exposing the backend port:
 
