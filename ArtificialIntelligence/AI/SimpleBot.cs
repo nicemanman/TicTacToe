@@ -1,8 +1,8 @@
-﻿using TicTacToeAI.AI.Interfaces;
-using TicTacToeAI.DataModel;
-using TicTacToeAI.DataModel.Interfaces;
+﻿using ArtificialIntelligence.AI.Interfaces;
+using ArtificialIntelligence.DataModel;
+using ArtificialIntelligence.DataModel.Interfaces;
 
-namespace TicTacToeAI.AI;
+namespace ArtificialIntelligence.AI;
 
 public class SimpleBot : IBot
 {

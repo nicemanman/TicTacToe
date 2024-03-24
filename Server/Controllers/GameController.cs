@@ -7,7 +7,7 @@ using Server.DTO.Responses;
 using Server.DTO.Results;
 using Server.Services;
 using Server.Services.Interfaces;
-using TicTacToeAI.DataModel;
+using ArtificialIntelligence.DataModel;
 using Game = Server.DataModel.Game;
 
 namespace Server.Controllers;

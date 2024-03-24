@@ -6,7 +6,7 @@ using Server.DataModel;
 using Server.DTO;
 using Server.DTO.Results;
 using Server.Services.Interfaces;
-using TicTacToeAI.DataModel;
+using ArtificialIntelligence.DataModel;
 using Game = Server.DataModel.Game;
 using GameState = Server.DataModel.GameState;
 

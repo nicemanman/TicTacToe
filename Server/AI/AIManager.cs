@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using TicTacToeAI.AI;
-using TicTacToeAI.AI.Interfaces;
-using TicTacToeAI.DataModel;
-using AIGame = TicTacToeAI.DataModel.Game;
+using ArtificialIntelligence.AI;
+using ArtificialIntelligence.AI.Interfaces;
+using ArtificialIntelligence.DataModel;
+using AIGame = ArtificialIntelligence.DataModel.Game;
 using Game = Server.DataModel.Game;
 
 namespace Server.AI;

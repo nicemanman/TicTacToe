@@ -1,4 +1,4 @@
-﻿namespace TicTacToeAI.DataModel;
+﻿namespace ArtificialIntelligence.DataModel;
 
 public class BoardCell
 {

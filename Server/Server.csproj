@@ -32,7 +32,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Database\Database.csproj" />
       <ProjectReference Include="..\Localization\Localization.csproj" />
-      <ProjectReference Include="..\TicTacToeAI\TicTacToeAI.csproj" />
+      <ProjectReference Include="..\ArtificialIntelligence\ArtificialIntelligence.csproj" />
     </ItemGroup>
 
     <ItemGroup>

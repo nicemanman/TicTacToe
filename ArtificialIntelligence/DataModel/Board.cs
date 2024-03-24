@@ -1,6 +1,6 @@
-﻿using TicTacToeAI.DataModel.Interfaces;
+﻿using ArtificialIntelligence.DataModel.Interfaces;
 
-namespace TicTacToeAI.DataModel;
+namespace ArtificialIntelligence.DataModel;
 
 public class Board : IBoard
 {

@@ -1,4 +1,4 @@
-﻿namespace TicTacToeAI.DataModel.Interfaces;
+﻿namespace ArtificialIntelligence.DataModel.Interfaces;
 
 public interface IGame
 {
