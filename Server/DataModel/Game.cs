@@ -1,5 +1,5 @@
 ﻿using Database.Interfaces;
-using TicTacToeAI.DataModel;
+using ArtificialIntelligence.DataModel;
 
 namespace Server.DataModel;
 

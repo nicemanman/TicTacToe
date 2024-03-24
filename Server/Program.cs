@@ -5,8 +5,8 @@ using Server.Data;
 using Server.Data.Interfaces;
 using Server.Services;
 using Server.Services.Interfaces;
-using TicTacToeAI.AI;
-using TicTacToeAI.AI.Interfaces;
+using ArtificialIntelligence.AI;
+using ArtificialIntelligence.AI.Interfaces;
 
 namespace Server;
 

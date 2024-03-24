@@ -14,22 +14,18 @@ public class BaseUnitOfWork : DbContext, IBaseUnitOfWork
     private bool _isDisposed;
     
     public string ConnectionString { get; set; }
-    public bool UseAutoMigration { get; set; }
     
     public BaseUnitOfWork(IConfiguration configuration)
     {
         ConnectionString = configuration.GetSection(DbConnectionOptions.ConnectionStringConfigString).Value;
-        UseAutoMigration = configuration.GetSection(DbConnectionOptions.UseAutoMigrationConfigString).Get<bool>();
 
         if (_logger.IsEnabled(LogLevel.Trace))
         {
             _logger.Log(LogLevel.Trace, $"New UnitOfWork with ContextId {ContextId} has been created. " +
-                                        $"Connection string is set to {ConnectionString}, " +
-                                        $"Automigrations set to {UseAutoMigration}");
+                                        $"Connection string is set to {ConnectionString}");
         }
     }
-
-
+    
     public bool IsDisposed
     {
         get => _isDisposed;

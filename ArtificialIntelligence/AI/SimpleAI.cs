@@ -1,9 +1,12 @@
-﻿using TicTacToeAI.AI.Interfaces;
-using TicTacToeAI.DataModel;
-using TicTacToeAI.DataModel.Interfaces;
+﻿using ArtificialIntelligence.AI.Interfaces;
+using ArtificialIntelligence.DataModel;
+using ArtificialIntelligence.DataModel.Interfaces;
 
-namespace TicTacToeAI.AI;
+namespace ArtificialIntelligence.AI;
 
+/// <summary>
+/// Простая реализация искуственного интеллекта для игра в крестики-нолики
+/// </summary>
 public class SimpleAI : IAI
 {
     /// <summary>

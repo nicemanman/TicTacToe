@@ -7,7 +7,7 @@ using Server.DTO.Responses;
 using Server.DTO.Results;
 using Server.Services;
 using Server.Services.Interfaces;
-using TicTacToeAI.DataModel;
+using ArtificialIntelligence.DataModel;
 using Game = Server.DataModel.Game;
 
 namespace Server.Controllers;
@@ -31,6 +31,10 @@ public class GameController : Controller
         _mapper = mapper;
     }
     
+    /// <summary>
+    /// Создать игровой раунд Крестики-нолики
+    /// </summary>
+    /// <param name="playerFirst">Будет ли игрок ходить первым</param>
     [HttpPost]   
     public async Task<IActionResult> Create(bool playerFirst = false)
     {
@@ -38,7 +42,9 @@ public class GameController : Controller
         {
             var result = await _gameService.CreateAsync(playerFirst);
             var gameDto = _mapper.Map<Game, GameDTO>(result.Game);
-            SetGameTokenToSession(result.Game);
+            
+            AddGameTokenToSession(result.Game);
+            
             return Ok(new CreateGameSuccessResponse()
             {
                 Game = gameDto,
@@ -56,6 +62,9 @@ public class GameController : Controller
         }
     }
     
+    /// <summary>
+    /// Получить состояние текущего игрового раунда
+    /// </summary>
     [HttpGet]   
     public async Task<IActionResult> Get()
     {
@@ -86,6 +95,9 @@ public class GameController : Controller
         }
     }
 
+    /// <summary>
+    /// Сделать ход в текущем игровом раунде Крестики-нолики
+    /// </summary>
     [HttpPatch]   
     public async Task<IActionResult> MakeAMove(int row, int column)
     {
@@ -115,7 +127,6 @@ public class GameController : Controller
                     Message = makeAMoveResult.Message
                 });
             }
-                
             
             return Ok(new MakeAMoveSuccessResponse()
             {
@@ -143,7 +154,7 @@ public class GameController : Controller
         return new Guid(token);
     }
     
-    private void SetGameTokenToSession(Game game)
+    private void AddGameTokenToSession(Game game)
     {
         HttpContext.Session.SetString(_currentGameToken, game.UUID.ToString());
     }
