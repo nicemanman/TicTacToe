@@ -71,7 +71,7 @@ These instructions will get your copy of the project up and running on your loca
    To start the environment with open server ports for debugging:
 
    ```bash
-   docker compose -f docker-compose.Development.yml up -d
+   docker compose -f docker-compose.Develop.yml up -d
    ```
 
    This will start both backend and frontend services with the backend server accessible for debugging.
