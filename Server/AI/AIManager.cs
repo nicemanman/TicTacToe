@@ -7,6 +7,9 @@ using Game = Server.DataModel.Game;
 
 namespace Server.AI;
 
+/// <summary>
+/// Реализация оппонента-искуственного интеллекта в игре крестики-нолики
+/// </summary>
 public class AiManager : IOpponentManager
 {
     private readonly IMapper _mapper;

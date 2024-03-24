@@ -2,6 +2,9 @@
 
 namespace ArtificialIntelligence.DataModel;
 
+/// <summary>
+/// <inheritdoc cref="IBoard"/>
+/// </summary>
 public class Board : IBoard
 {
     private static readonly string _player = "X";
@@ -42,6 +45,9 @@ public class Board : IBoard
         return boardCells;
     }
     
+    /// <summary>
+    /// <inheritdoc cref="IBoard.IsEmpty"/>
+    /// </summary>
     public bool IsEmpty(int row, int col)
     {
         if (row < 0 || col < 0)
@@ -50,6 +56,9 @@ public class Board : IBoard
         return board[row, col] == _empty;
     }
 
+    /// <summary>
+    /// <inheritdoc cref="IBoard.GetCurrentScore"/>
+    /// </summary>
     public int GetCurrentScore()
     {
         //Проверить строки
@@ -101,6 +110,9 @@ public class Board : IBoard
         return 0;
     }
 
+    /// <summary>
+    /// <inheritdoc cref="IBoard.SetPlayer"/>
+    /// </summary>
     public void SetPlayer(int row, int col)
     {
         if (row < 0 || col < 0)
@@ -109,6 +121,9 @@ public class Board : IBoard
         board[row, col] = _player;
     }
 
+    /// <summary>
+    /// <inheritdoc cref="IBoard.SetOpponent"/>
+    /// </summary>
     public void SetOpponent(int row, int col)
     {
         if (row < 0 || col < 0)
@@ -117,6 +132,9 @@ public class Board : IBoard
         board[row, col] = _opponent;
     }
 
+    /// <summary>
+    /// <inheritdoc cref="IBoard.UndoMove"/>
+    /// </summary>
     public void UndoMove(int row, int col)
     {
         if (row < 0 || col < 0)
@@ -125,11 +143,17 @@ public class Board : IBoard
         board[row, col] = _empty;
     }
     
+    /// <summary>
+    /// <inheritdoc cref="IBoard.CheckIfPlayerHasRowsSet"/>
+    /// </summary>
     public bool CheckIfPlayerHasRowsSet()
     {
         return IsWinner(_player);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="IBoard.CheckIfOpponentHasRowsSet"/>
+    /// </summary>
     public bool CheckIfOpponentHasRowsSet()
     {
         return IsWinner(_opponent);
@@ -158,10 +182,8 @@ public class Board : IBoard
     }
     
     /// <summary>
-    /// Остались ли еще возможности для хода
+    /// <inheritdoc cref="IBoard.IsPossibleToMakeAMove"/>
     /// </summary>
-    /// <param name="board"></param>
-    /// <returns></returns>
     public bool IsPossibleToMakeAMove()
     {
         for (int row = 0; row < 3; row++)

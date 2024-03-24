@@ -53,7 +53,7 @@ public class DatabaseTransactionMiddleware : IMiddleware
             _logger.LogError(ex.Message, ex);
             _logger.LogError(ex.InnerException?.Message, ex.InnerException);
             _unitOfWork.RollbackTransaction();
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context);
         }
     }
 
@@ -65,11 +65,11 @@ public class DatabaseTransactionMiddleware : IMiddleware
         return false;
     }
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context)
     {
-        string errorMessage = JsonConvert.SerializeObject(new TransactionCommitErrorResponse()
+        string errorMessage = JsonConvert.SerializeObject(new GeneralErrorResponse()
         {
-            Error = "Произошла ошибка при коммите транзакции"
+            Error = "Произошла неизвестная ошибка, попробуйте выполнить запрос позднее"
         });
         
         context.Response.Clear();

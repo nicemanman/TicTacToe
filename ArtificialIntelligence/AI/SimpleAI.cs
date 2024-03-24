@@ -4,6 +4,9 @@ using ArtificialIntelligence.DataModel.Interfaces;
 
 namespace ArtificialIntelligence.AI;
 
+/// <summary>
+/// Простая реализация искуственного интеллекта для игра в крестики-нолики
+/// </summary>
 public class SimpleAI : IAI
 {
     /// <summary>
