@@ -7,5 +7,5 @@ namespace Server.AI;
 /// </summary>
 public interface IOpponentManager
 {
-    public Game MakeMove(Game game);
+    public Task<Game> MakeMove(Game game);
 }

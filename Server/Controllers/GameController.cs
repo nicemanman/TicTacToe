@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
 using Localization.Common;
-using Localization.Game;
 using Microsoft.AspNetCore.Mvc;
 using Server.DTO;
 using Server.DTO.Responses;
 using Server.DTO.Results;
-using Server.Services;
 using Server.Services.Interfaces;
-using ArtificialIntelligence.DataModel;
 using Game = Server.DataModel.Game;
 
 namespace Server.Controllers;

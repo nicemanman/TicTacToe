@@ -1,12 +1,9 @@
-﻿using System.Security.Cryptography;
-using Localization.Game;
+﻿using Localization.Game;
 using Server.AI;
 using Server.Data.Interfaces;
 using Server.DataModel;
-using Server.DTO;
 using Server.DTO.Results;
 using Server.Services.Interfaces;
-using ArtificialIntelligence.DataModel;
 using Game = Server.DataModel.Game;
 using GameState = Server.DataModel.GameState;
 
@@ -31,7 +28,7 @@ public class GameService : IGameService
         };
         
         if (!playerFirst)
-            game = _opponentManager.MakeMove(game);
+            game = await _opponentManager.MakeMove(game);
         
         game = await _unitOfWork.GamesRepository.CreateAsync(game);
         
@@ -62,7 +59,7 @@ public class GameService : IGameService
         if (game.State == GameState.PlayerWin) 
             message = GameMessages.GameFinished_PlayerWin;
         
-        if (game.State == GameState.BotWin) 
+        if (game.State == GameState.OpponentWin) 
             message = GameMessages.GameFinished_BotWin;
         
         GetGameResult result = new()
@@ -93,7 +90,7 @@ public class GameService : IGameService
         //TODO: не стоит хардкодить, времени мало, потом можно будет доделать
         field.Char = "X";
         
-        game = _opponentManager.MakeMove(game);
+        game = await _opponentManager.MakeMove(game);
         game = await _unitOfWork.GamesRepository.UpdateAsync(game);
         
         if (!TryGetWinnerMessage(game, out string message))
@@ -128,7 +125,7 @@ public class GameService : IGameService
             return true;
         }
         
-        if (game.State == GameState.BotWin)
+        if (game.State == GameState.OpponentWin)
         {
             message = GameMessages.GameFinished_BotWin;
             return true;

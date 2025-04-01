@@ -1,6 +1,4 @@
-﻿using Server.DataModel;
-
-namespace Server.DTO;
+﻿namespace Server.DTO;
 
 public class GameDTO
 {

@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using ArtificialIntelligence.AI;
 using ArtificialIntelligence.AI.Interfaces;
-using ArtificialIntelligence.DataModel;
 using AIGame = ArtificialIntelligence.DataModel.Game;
 using Game = Server.DataModel.Game;
 
@@ -21,8 +19,10 @@ public class AiManager : IOpponentManager
         _bot = bot;
     }
     
-    public Game MakeMove(Game game)
+    public Task<Game> MakeMove(Game game)
     {
+        //Возможно тут тоже стоит заменить прямой вызов AI на отправку нотификации,
+        //чтобы работало по аналогии.
         AIGame aiGame = _mapper.Map<Game, AIGame>(game);
         _bot.MakeMove(aiGame);
         _mapper.Map(aiGame, game);
@@ -34,6 +34,6 @@ public class AiManager : IOpponentManager
             field.Char = cell.Char;
         }
         
-        return game;
+        return Task.FromResult(game);
     }
 }

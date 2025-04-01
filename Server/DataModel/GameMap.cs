@@ -1,6 +1,4 @@
-﻿using Database.Interfaces;
-
-namespace Server.DataModel;
+﻿namespace Server.DataModel;
 
 public class GameMap
 {

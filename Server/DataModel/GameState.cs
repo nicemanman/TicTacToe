@@ -3,7 +3,7 @@
 public enum GameState
 {
     PlayerWin,
-    BotWin,
+    OpponentWin,
     InProgress,
     Tie,
 }

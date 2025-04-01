@@ -1,9 +1,4 @@
-﻿using System.Net;
-using UserInterface.DTO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.JSInterop;
+﻿using UserInterface.DTO;
 
 namespace UserInterface.Services;
 public class GameService

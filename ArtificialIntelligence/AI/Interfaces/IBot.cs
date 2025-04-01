@@ -1,5 +1,4 @@
 ﻿using ArtificialIntelligence.DataModel.Interfaces;
-using ArtificialIntelligence.DataModel;
 
 namespace ArtificialIntelligence.AI.Interfaces;
 
