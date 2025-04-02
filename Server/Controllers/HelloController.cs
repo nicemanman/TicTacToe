@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MessageQueue.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Server.Controllers;
 

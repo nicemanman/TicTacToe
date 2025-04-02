@@ -1,8 +1,8 @@
 ﻿namespace MessageQueue.Options;
 
-public class MessageQueueOptions
+public class RabbitOptions
 {
-	public static string SectionName = nameof(MessageQueueOptions);
+	public static string SectionName = nameof(RabbitOptions);
 	
 	public string Hostname { get; init; }
 	

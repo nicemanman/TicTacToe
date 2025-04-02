@@ -33,6 +33,7 @@
       <ProjectReference Include="..\Database\Database.csproj" />
       <ProjectReference Include="..\Localization\Localization.csproj" />
       <ProjectReference Include="..\ArtificialIntelligence\ArtificialIntelligence.csproj" />
+      <ProjectReference Include="..\MessageQueue\MessageQueue.csproj" />
     </ItemGroup>
 
     <ItemGroup>

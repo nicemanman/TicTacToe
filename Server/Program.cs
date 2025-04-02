@@ -7,6 +7,7 @@ using Server.Services;
 using Server.Services.Interfaces;
 using ArtificialIntelligence.AI;
 using ArtificialIntelligence.AI.Interfaces;
+using MessageQueue.Extensions;
 
 namespace Server;
 
@@ -34,6 +35,7 @@ public class Program
         builder.Services.AddScoped<IBot, SimpleBot>();
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession();
+        builder.Services.AddRabbitMq(builder.Configuration);
         
         var app = builder.Build();
 

@@ -49,13 +49,13 @@
     networks:
       - tictactoe-network
     volumes:
-      - rabbit/data:/var/lib/rabbitmq/
-      - rabbit/log:/var/log/rabbitmq/
+      - rabbit-data:/var/lib/rabbitmq/
+      - rabbit-log:/var/log/rabbitmq/
+
 volumes:
   db:
-    driver: local
-  rabbit:
-    driver: local
+  rabbit-data:
+  rabbit-log:
     
 networks:
   tictactoe-network:
