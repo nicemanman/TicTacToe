@@ -1,4 +1,5 @@
-﻿using UserInterface.DTO;
+﻿using System.Net;
+using UserInterface.DTO;
 
 namespace UserInterface.Services;
 public class GameService
@@ -19,7 +20,14 @@ public class GameService
 
     public async Task<GameResponse> GetGame()
     {
-        return await _httpClient.GetFromJsonAsync<GameResponse>("/api/game");
+        var response = await _httpClient.GetAsync("/api/game");
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new GameResponse();
+
+        var body = await response.Content.ReadFromJsonAsync<GameResponse>();
+
+        return body;
     }
 
     public async Task<GameResponse> MakeMove(int row, int column)

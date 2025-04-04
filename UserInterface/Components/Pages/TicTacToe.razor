@@ -3,8 +3,10 @@
 @using UserInterface.Services
 @inject GameService GameService
 @inject NavigationManager NavigationManager
+
 @if (_gameResponse is { Game: not null })
 {
+    //Отобразить игру
     <div>
         @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
         {
@@ -17,6 +19,7 @@
         }
     </div>
 }
+//Отобразить ошибку
 else if (_gameResponse?.Error != null)
 {
     <div>@_gameResponse.Error</div>
@@ -24,6 +27,7 @@ else if (_gameResponse?.Error != null)
 
 @if (_gameResponse != null && !string.IsNullOrEmpty(_gameResponse.Message) && _gameResponse.Game == null)
 {
+    //Отобразить информационное сообщение
     <div>
         <span>@_gameResponse.Message</span>
         <button @onclick="StartOver">OK</button>

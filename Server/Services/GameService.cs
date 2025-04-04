@@ -1,12 +1,13 @@
 ﻿using Localization.Game;
 using Server.Data.Interfaces;
 using Server.DataModel;
+using Server.OpponentManager;
 using Server.Services.Interfaces;
 using Game = Server.DataModel.Game;
 
 namespace Server.Services;
 
-public class GameService(IUnitOfWork unitOfWork) : IGameService
+public class GameService(IUnitOfWork unitOfWork, IBotManager botManager) : IGameService
 {
     public async Task<Result<Game>> CreateAsync()
     {
@@ -21,9 +22,9 @@ public class GameService(IUnitOfWork unitOfWork) : IGameService
         return Result.Ok(game);
     }
 
-    public async Task<Result<Game>> MakeAMoveAsync(Game game, int row, int column)
+    public async Task<Result<Game>> MakeAMoveAsync(GameSession game, int row, int column)
     {
-        var field = game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
+        var field = game.Game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
 
         if (field == null)
             return Result.Fail<Game>(GameMessages.UnableToSetCell_UnknownCell);
@@ -34,8 +35,10 @@ public class GameService(IUnitOfWork unitOfWork) : IGameService
         //TODO: не стоит хардкодить, времени мало, потом можно будет доделать
         field.Char = "X";
         
-        game = await unitOfWork.GamesRepository.UpdateAsync(game);
+        if (game.Player2Id == TicTacToeConstants.BotId)
+            game.Game = botManager.MakeMove(game.Game);
         
-        return Result.Ok(game);
+        game.Game = await unitOfWork.GamesRepository.UpdateAsync(game.Game);
+        return Result.Ok(game.Game);
     }
 }

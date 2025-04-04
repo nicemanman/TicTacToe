@@ -141,7 +141,7 @@ public class GameSessionManager(
 	{
 		var session = await unitOfWork.GameSessionRepository
 			.FirstOrDefault(s => s.Player1Id == playerId || s.Player2Id == playerId);
-		
+
 		return session;
 	}
 
@@ -169,18 +169,14 @@ public class GameSessionManager(
 		if (session.Player2Id != TicTacToeConstants.BotId && currentUserId != session.PlayerIdTurn)
 			return Result.Fail<GameSession>(GameMessages.UnableToSetCell_NotYourTurn);
 		
-		var makeMoveResult = await gameService.MakeAMoveAsync(session.Game, row, column);
+		var makeMoveResult = await gameService.MakeAMoveAsync(session, row, column);
 		
 		if (makeMoveResult.Failure)
 			return Result.Fail<GameSession>(makeMoveResult.Error);
 
 		await RegisterActivity(session);
 
-		if (session.Player2Id == TicTacToeConstants.BotId)
-		{
-			session.Game = botManager.MakeMove(session.Game);
-		}
-		else
+		if (session.Player2Id != TicTacToeConstants.BotId)
 		{
 			string nextTurnPlayer = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id;
 			session.PlayerIdTurn = nextTurnPlayer;
