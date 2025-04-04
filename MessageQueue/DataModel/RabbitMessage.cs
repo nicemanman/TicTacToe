@@ -2,5 +2,16 @@
 
 public class RabbitMessage
 {
-	public string Payload { get; init; }
+	public string SenderId { get; init; }
+	
+	public string ReceiverId { get; init; }
+	
+	public object Payload { get; init; }
+	
+	public MessageType MessageType { get; init; }
+}
+
+public enum MessageType
+{
+	
 }

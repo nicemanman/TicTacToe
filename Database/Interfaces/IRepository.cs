@@ -35,10 +35,12 @@ public interface IRepository<T>
     /// <summary>
     /// Удалить сущность
     /// </summary>
-    Task DeleteAsync(Guid uuid);
+    Task<T> DeleteAsync(Guid uuid);
 
     /// <summary>
     /// Найти первую сущность, подходящую под условие
     /// </summary>
     Task<T> FirstOrDefault(Expression<Func<T, bool>> expression);
+
+    bool Exists(Expression<Func<T, bool>> expression);
 }

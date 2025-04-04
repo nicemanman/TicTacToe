@@ -27,6 +27,12 @@
     <data name="YourTurn" xml:space="preserve">
         <value>Ваш ход</value>
     </data>
+    <data name="OpponentsTurn" xml:space="preserve">
+        <value>Ход противника</value>
+    </data>
+    <data name="UnableToSetCell.NotYourTurn" xml:space="preserve">
+        <value>Сейчас не ваш ход</value>
+    </data>
     <data name="UnableToSetCell.UnknownCell" xml:space="preserve">
         <value>Поле отсутствует на этой карте</value>
     </data>
@@ -39,7 +45,7 @@
     <data name="GameFinished.PlayerWin" xml:space="preserve">
         <value>Результат матча - победил игрок</value>
     </data>
-    <data name="GameFinished.BotWin" xml:space="preserve">
-        <value>Результат матча - победил бот</value>
+    <data name="GameFinished.OpponentWin" xml:space="preserve">
+        <value>Результат матча - победил противник</value>
     </data>
 </root>

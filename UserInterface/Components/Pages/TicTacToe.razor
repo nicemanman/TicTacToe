@@ -3,7 +3,7 @@
 @using UserInterface.Services
 @inject GameService GameService
 @inject NavigationManager NavigationManager
-@if (_gameResponse != null && _gameResponse.Game != null)
+@if (_gameResponse is { Game: not null })
 {
     <div>
         @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)

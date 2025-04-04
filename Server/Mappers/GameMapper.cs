@@ -12,11 +12,14 @@ public class GameMapper : Profile
 {
     public GameMapper()
     {
-        CreateMap<Game, GameDTO>()
+        CreateMap<GameSession, GameDTO>()
             .ForMember(x => x.GameMap, expression =>
             {
-                expression.MapFrom(x=> MapFieldsToNestedDictionary(x.GameMap.Fields));
-            });
+                expression.MapFrom(x=> MapFieldsToNestedDictionary(x.Game.GameMap.Fields));
+            })
+            .ForMember(x=>x.JoinCode, 
+                expression => expression.MapFrom(x=>x.JoinCode))
+            .ForMember(x => x.State, expression => expression.MapFrom(x => x.Game.State));
         
         CreateMap<Game, AIGame>()
             .ForMember(dst => dst.Board, expression =>

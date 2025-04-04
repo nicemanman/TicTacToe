@@ -1,14 +1,14 @@
-﻿using AutoMapper;
-using ArtificialIntelligence.AI.Interfaces;
+﻿using ArtificialIntelligence.AI.Interfaces;
+using AutoMapper;
 using AIGame = ArtificialIntelligence.DataModel.Game;
 using Game = Server.DataModel.Game;
 
-namespace Server.AI;
+namespace Server.OpponentManager;
 
 /// <summary>
 /// Реализация оппонента-искуственного интеллекта в игре крестики-нолики
 /// </summary>
-public class AiManager : IOpponentManager
+public class AiManager : IBotManager
 {
     private readonly IMapper _mapper;
     private readonly IBot _bot;
@@ -19,10 +19,8 @@ public class AiManager : IOpponentManager
         _bot = bot;
     }
     
-    public Task<Game> MakeMove(Game game)
+    public Game MakeMove(Game game)
     {
-        //Возможно тут тоже стоит заменить прямой вызов AI на отправку нотификации,
-        //чтобы работало по аналогии.
         AIGame aiGame = _mapper.Map<Game, AIGame>(game);
         _bot.MakeMove(aiGame);
         _mapper.Map(aiGame, game);
@@ -33,7 +31,7 @@ public class AiManager : IOpponentManager
             var field = game.GameMap.Fields.FirstOrDefault(x => x.Row == cell.Row && x.Column == cell.Column);
             field.Char = cell.Char;
         }
-        
-        return Task.FromResult(game);
+
+        return game;
     }
 }

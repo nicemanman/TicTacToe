@@ -11,10 +11,9 @@ public static class RabbitExtension
 	public static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
 	{
 		services.Configure<RabbitOptions>(configuration.GetSection(RabbitOptions.SectionName));
-		services.AddSingleton<BackgroundJob>();
-		services.AddHostedService(x => x.GetRequiredService<BackgroundJob>());
-		services.AddSingleton<IMqSender>(x => x.GetRequiredService<BackgroundJob>());
-		services.AddScoped<IMqReceiver>(x => x.GetRequiredService<BackgroundJob>());
+		services.AddSingleton<RabbitClient>();
+		services.AddHostedService(x => x.GetRequiredService<RabbitClient>());
+		services.AddSingleton<IMqClient>(x => x.GetRequiredService<RabbitClient>());
 		
 		return services;
 	}

@@ -11,9 +11,9 @@ public class GameService
         _httpClient = httpClientFactory.CreateClient("MyClient");
     }
 
-    public async Task<GameResponse> CreateGame(bool playerFirst)
+    public async Task<GameResponse> CreateGame(bool againstBot)
     {
-        var response = await _httpClient.PostAsJsonAsync($"/api/game?playerFirst={playerFirst}", new {});
+        var response = await _httpClient.PostAsJsonAsync($"/api/game?againstBot={againstBot}", new {});
         return await response.Content.ReadFromJsonAsync<GameResponse>();
     }
 

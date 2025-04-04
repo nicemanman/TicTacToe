@@ -6,4 +6,6 @@ namespace Server.Data.Interfaces;
 public interface IUnitOfWork : IBaseUnitOfWork
 {
     public IRepository<Game> GamesRepository { get; set; }
+    
+    public IRepository<GameSession> GameSessionRepository { get; set; }
 }

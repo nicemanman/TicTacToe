@@ -10,9 +10,9 @@
 @if (_startNewGame)
 {
     <div>
-        <span>Хотите ли вы ходить первым?</span>
-        <button @onclick="async () => await CreateGame(true)">Да</button>
-        <button @onclick="async () => await CreateGame(false)">Нет</button>
+        <span>С кем вы хотите сыграть?</span>
+        <button @onclick="async () => await CreateGame(true)">С ботом</button>
+        <button @onclick="async () => await CreateGame(false)">С другом</button>
     </div>
 }
 
@@ -26,16 +26,15 @@
 
     private void ContinueGame()
     {
-        Logger.LogDebug("Hello");
         _startNewGame = false;
         // Здесь мы перенаправляем пользователя на компонент игры, который автоматически попытается загрузить текущую игру
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }
 
-    private async Task CreateGame(bool playerFirst)
+    private async Task CreateGame(bool againstBot)
     {
         _startNewGame = false;
-        await GameService.CreateGame(playerFirst);
+        await GameService.CreateGame(againstBot);
         // После создания новой игры перенаправляем пользователя на компонент игры
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }

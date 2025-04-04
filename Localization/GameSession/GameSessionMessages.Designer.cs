@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Localization.Game {
+namespace Localization.GameSession {
     using System;
     
     
@@ -21,14 +21,14 @@ namespace Localization.Game {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class GameMessages {
+    public class GameSessionMessages {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal GameMessages() {
+        internal GameSessionMessages() {
         }
         
         /// <summary>
@@ -38,7 +38,7 @@ namespace Localization.Game {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Localization.Game.GameMessages", typeof(GameMessages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Localization.GameSession.GameSessionMessages", typeof(GameSessionMessages).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,92 +60,74 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Не удалось начать игру, попробуйте позже.
+        ///   Looks up a localized string similar to Код подключения должен быть не пустым.
         /// </summary>
-        public static string GameCreateFailed {
+        public static string JoinCodeEmpty {
             get {
-                return ResourceManager.GetString("GameCreateFailed", resourceCulture);
+                return ResourceManager.GetString("JoinCodeEmpty", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - ничья.
+        ///   Looks up a localized string similar to Не удалось подключиться к игре.
         /// </summary>
-        public static string GameFinished_ItsATie {
+        public static string JoiningError {
             get {
-                return ResourceManager.GetString("GameFinished.ItsATie", resourceCulture);
+                return ResourceManager.GetString("JoiningError", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил противник.
+        ///   Looks up a localized string similar to Сейчас не ваша очередь делать ход.
         /// </summary>
-        public static string GameFinished_OpponentWin {
+        public static string NotYourTurn {
             get {
-                return ResourceManager.GetString("GameFinished.OpponentWin", resourceCulture);
+                return ResourceManager.GetString("NotYourTurn", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил игрок.
+        ///   Looks up a localized string similar to У вас уже есть активная игра.
         /// </summary>
-        public static string GameFinished_PlayerWin {
+        public static string SessionAlreadyCreated {
             get {
-                return ResourceManager.GetString("GameFinished.PlayerWin", resourceCulture);
+                return ResourceManager.GetString("SessionAlreadyCreated", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Не удалось найти игру, попробуйте позже или создайте новую.
+        ///   Looks up a localized string similar to Не удалось создать игру.
         /// </summary>
-        public static string GameNotFound {
+        public static string SessionFailedAtCreation {
             get {
-                return ResourceManager.GetString("GameNotFound", resourceCulture);
+                return ResourceManager.GetString("SessionFailedAtCreation", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ход противника.
+        ///   Looks up a localized string similar to В этой игре уже достаточно участников.
         /// </summary>
-        public static string OpponentsTurn {
+        public static string SessionIsFull {
             get {
-                return ResourceManager.GetString("OpponentsTurn", resourceCulture);
+                return ResourceManager.GetString("SessionIsFull", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Выбор в этом поле уже сделан.
+        ///   Looks up a localized string similar to Игра не найдена.
         /// </summary>
-        public static string UnableToSetCell_AlreadySet {
+        public static string SessionNotFound {
             get {
-                return ResourceManager.GetString("UnableToSetCell.AlreadySet", resourceCulture);
+                return ResourceManager.GetString("SessionNotFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Сейчас не ваш ход.
+        ///   Looks up a localized string similar to Вы уже находитесь в этой игре.
         /// </summary>
-        public static string UnableToSetCell_NotYourTurn {
+        public static string YouAlreadyJoined {
             get {
-                return ResourceManager.GetString("UnableToSetCell.NotYourTurn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Поле отсутствует на этой карте.
-        /// </summary>
-        public static string UnableToSetCell_UnknownCell {
-            get {
-                return ResourceManager.GetString("UnableToSetCell.UnknownCell", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Ваш ход.
-        /// </summary>
-        public static string YourTurn {
-            get {
-                return ResourceManager.GetString("YourTurn", resourceCulture);
+                return ResourceManager.GetString("YouAlreadyJoined", resourceCulture);
             }
         }
     }

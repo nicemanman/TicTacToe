@@ -1,6 +1,5 @@
 using Database.Extensions;
 using NLog.Extensions.Logging;
-using Server.AI;
 using Server.Data;
 using Server.Data.Interfaces;
 using Server.Services;
@@ -8,6 +7,8 @@ using Server.Services.Interfaces;
 using ArtificialIntelligence.AI;
 using ArtificialIntelligence.AI.Interfaces;
 using MessageQueue.Extensions;
+using Server.Middlewares;
+using Server.OpponentManager;
 
 namespace Server;
 
@@ -31,12 +32,14 @@ public class Program
         });
         builder.Services.AddUnitOfWork<IUnitOfWork, UnitOfWork>(builder.Configuration);
         builder.Services.AddScoped<IGameService, GameService>();
-        builder.Services.AddScoped<IOpponentManager, AiManager>();
+        builder.Services.AddScoped<IBotManager, AiManager>();
         builder.Services.AddScoped<IBot, SimpleBot>();
+        builder.Services.AddScoped<IGameSessionManager, GameSessionManager>();
+        builder.Services.AddScoped<IJoinCodeService, JoinCodeService>();
+        builder.Services.AddSingleton<ImplicitRegistrationMiddleware>();
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession();
         builder.Services.AddRabbitMq(builder.Configuration);
-        
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
@@ -55,6 +58,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseTransaction();
         app.UseSession();
+        app.UseMiddleware<ImplicitRegistrationMiddleware>();
         app.MapControllers();
 
         app.Run();

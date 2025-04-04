@@ -20,17 +20,23 @@ public class Repository<T> : IRepository<T> where T: class, IEntity, new()
         return entity;
     }
     
-    public virtual async Task DeleteAsync(Guid uuid)
+    public virtual Task<T> DeleteAsync(Guid uuid)
     {
         T entity = new T() { UUID = uuid };
-        _dbSet.Remove(entity);
+        var deletedEntity = _dbSet.Remove(entity);
+        return Task.FromResult(deletedEntity.Entity);
     }
     
-    public async Task<T> FirstOrDefault(Expression<Func<T, bool>> expression)
+    public virtual async Task<T> FirstOrDefault(Expression<Func<T, bool>> expression)
     {
         return await _dbSet.FirstOrDefaultAsync(expression);
     }
-    
+
+    public bool Exists(Expression<Func<T, bool>> expression)
+    {
+        return _dbSet.Any(expression);
+    }
+
     public virtual async Task<T> GetAsync(Guid uuid)
     {
         T? entity = await _dbSet.FirstOrDefaultAsync(u => u.UUID == uuid);

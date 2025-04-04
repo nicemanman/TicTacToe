@@ -1,6 +1,11 @@
-﻿namespace MessageQueue.Services.Interfaces;
+﻿using MessageQueue.DataModel;
+using RabbitMQ.Client.Events;
 
-public interface IMqSender
+namespace MessageQueue.Services.Interfaces;
+
+public interface IMqClient
 {
-	public Task Send<T>(T t);
+	Task Subscribe(string userId, Func<RabbitMessage, Task> onMessage);
+	
+	public Task Send(RabbitMessage t);
 }

@@ -10,13 +10,5 @@ public class Game : IEntity
 
     public GameState State { get; init; } = GameState.InProgress;
 
-    public bool IsFinished => State is GameState.Tie or GameState.OpponentWin or GameState.PlayerWin;
-    
-    public uint CreatorId { get; init; }
-    
-    public uint OpponentId { get; init; }
-    
-    public bool IsOpponentTurn { get; init; }
-    
-    public bool OpponentIsBot { get; init; }
+    public bool IsFinished => State is GameState.Tie or GameState.Player2Win or GameState.Player1Win;
 }

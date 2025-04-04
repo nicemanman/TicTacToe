@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Localization.Common;
+using Localization.Game;
+using Localization.GameSession;
 using Microsoft.AspNetCore.Mvc;
+using Server.DataModel;
 using Server.DTO;
 using Server.DTO.Responses;
-using Server.DTO.Results;
 using Server.Services.Interfaces;
 using Game = Server.DataModel.Game;
 
@@ -13,17 +15,15 @@ namespace Server.Controllers;
 [Route("api/[controller]")]
 public class GameController : Controller
 {
-    private const string _currentGameToken = "CURRENT_GAME_TOKEN";
-    
-    private readonly IGameService _gameService;
+    private readonly IGameSessionManager _gameSessionManager;
     private readonly ILogger<GameController> _logger;
     private readonly IMapper _mapper;
 
-    public GameController(IGameService gameService, 
+    public GameController(IGameSessionManager gameSessionManager, 
         ILogger<GameController> logger, 
         IMapper mapper)
     {
-        _gameService = gameService;
+        _gameSessionManager = gameSessionManager;
         _logger = logger;
         _mapper = mapper;
     }
@@ -31,21 +31,59 @@ public class GameController : Controller
     /// <summary>
     /// Создать игровой раунд Крестики-нолики
     /// </summary>
-    /// <param name="playerFirst">Будет ли игрок ходить первым</param>
     [HttpPost]   
-    public async Task<IActionResult> Create(bool playerFirst = false)
+    public async Task<IActionResult> Create(bool againstBot = false)
     {
         try
         {
-            var result = await _gameService.CreateAsync(playerFirst);
-            var gameDto = _mapper.Map<Game, GameDTO>(result.Game);
+            var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
             
-            AddGameTokenToSession(result.Game);
+            var result = await _gameSessionManager.StartParty(userId, againstBot);
+            
+            if (result.Failure)
+                return StatusCode(500, new CreateGameErrorResponse()
+                {
+                    Error = GameSessionMessages.SessionFailedAtCreation
+                });
+            
+            var gameDto = _mapper.Map<GameSession, GameDTO>(result.Value);
             
             return Ok(new CreateGameSuccessResponse()
             {
-                Game = gameDto,
-                Message = result.Message
+                Game = gameDto
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            
+            return StatusCode(500, new CreateGameErrorResponse()
+            {
+                Error = Errors.UnknownError
+            });
+        }
+    }
+    
+    [HttpPost(nameof(Join))]   
+    public async Task<IActionResult> Join(string joinCode)
+    {
+        try
+        {
+            var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
+            
+            var result = await _gameSessionManager.Join(userId, joinCode);
+                
+            if (result.Failure)
+                return StatusCode(500, new CreateGameErrorResponse()
+                {
+                    Error = GameSessionMessages.JoiningError
+                });
+                
+            var gameDto = _mapper.Map<GameSession, GameDTO>(result.Value);
+            
+            return Ok(new CreateGameSuccessResponse()
+            {
+                Game = gameDto
             });
         }
         catch (Exception ex)
@@ -67,18 +105,21 @@ public class GameController : Controller
     {
         try
         {
-            GetGameResult result = await _gameService.GetAsync(GetGameTokenFromSession());
+            var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
+            var result = await _gameSessionManager.FindActiveSession(userId);
             
-            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
+            if (result.Failure)
                 return Ok(new GetGameErrorResponse()
                 {
-                    Error = result.ErrorMessage
+                    Error = result.Error
                 });
+            
+            if (result.Success && result.Value == null)
+                return StatusCode(204);
             
             return Ok(new GetGameSuccessResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(result.Game),
-                Message = result.Message
+                Game = _mapper.Map<GameSession, GameDTO>(result.Value),
             });
         }
         catch (Exception ex)
@@ -100,35 +141,42 @@ public class GameController : Controller
     {
         try
         {
-            GetGameResult getResult = await _gameService.GetAsync(GetGameTokenFromSession());
+            var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
+            var session = await _gameSessionManager.FindActiveSession(userId);
             
-            if (!string.IsNullOrWhiteSpace(getResult.ErrorMessage))
+            if (session.Failure)
                 return Ok(new GetGameErrorResponse()
                 {
-                    Error = getResult.ErrorMessage
+                    Error = session.Error
                 });
-
-            MakeAMoveResult makeAMoveResult = await _gameService.MakeAMoveAsync(getResult.Game, row, column);
             
-            if (!string.IsNullOrWhiteSpace(makeAMoveResult.ErrorMessage))
+            if (session is { Success: true, Value: null })
                 return Ok(new MakeAMoveErrorResponse()
                 {
-                    Error = makeAMoveResult.ErrorMessage
+                    Error = GameMessages.GameNotFound
                 });
 
-            if (makeAMoveResult.GameIsFinished)
-            {
-                RemoveGameTokenFromSession();
-                return Ok(new MakeAMoveGameIsFinishedResponse()
-                {
-                    Message = makeAMoveResult.Message
-                });
-            }
+            var makeAMoveResult = await _gameSessionManager.MakeMove(session.Value, userId, row, column);
             
-            return Ok(new MakeAMoveSuccessResponse()
+            if (makeAMoveResult.Failure)
+                return Ok(new MakeAMoveErrorResponse()
+                {
+                    Error = makeAMoveResult.Error
+                });
+
+            if (!makeAMoveResult.Value.IsGameFinished)
+                return Ok(new MakeAMoveSuccessResponse()
+                {
+                    Game = _mapper.Map<GameSession, GameDTO>(makeAMoveResult.Value)
+                });
+            
+            TryGetWinnerMessage(makeAMoveResult.Value.Game, out var outcome);
+            
+            return Ok(new MakeAMoveGameIsFinishedResponse()
             {
-                Game = _mapper.Map<Game, GameDTO>(makeAMoveResult.Game)
+                Message = outcome
             });
+
         }
         catch (Exception ex)
         {
@@ -141,23 +189,26 @@ public class GameController : Controller
         }
     }
     
-    private Guid GetGameTokenFromSession()
+    private static bool TryGetWinnerMessage(Game game, out string message)
     {
-        string token = HttpContext.Session.GetString(_currentGameToken);
+        message = string.Empty;
         
-        if (string.IsNullOrWhiteSpace(token))
-            return Guid.Empty;
+        if (!game.IsFinished)
+            return false;
         
-        return new Guid(token);
-    }
-    
-    private void AddGameTokenToSession(Game game)
-    {
-        HttpContext.Session.SetString(_currentGameToken, game.UUID.ToString());
-    }
-    
-    private void RemoveGameTokenFromSession()
-    {
-        HttpContext.Session.Remove(_currentGameToken);
+        switch (game.State)
+        {
+            case GameState.Tie:
+                message = GameMessages.GameFinished_ItsATie;
+                return true;
+            case GameState.Player1Win:
+                message = GameMessages.GameFinished_PlayerWin;
+                return true;
+            case GameState.Player2Win:
+                message = GameMessages.GameFinished_OpponentWin;
+                return true;
+            default:
+                return false;
+        }
     }
 }
