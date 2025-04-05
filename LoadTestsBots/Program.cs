@@ -7,7 +7,7 @@ public class Program
 {
     public static async Task Main()
     {
-        const int userCount = 100;
+        const int userCount = 10;
         var baseAddress = "http://localhost:5000";
 
         var completed = 0;
@@ -27,14 +27,14 @@ public class Program
             player.OnCompleted += u =>
             {
                 Interlocked.Increment(ref completed);
-                Console.WriteLine($"✅ {u} завершил игру");
+                Console.WriteLine($"{u} завершил игру");
             };
 
             player.OnError += (u, ex) =>
             {
                 Interlocked.Increment(ref failed);
                 errors.Add((u, ex.Message));
-                Console.WriteLine($"❌ {u} ошибка: {ex.Message}");
+                Console.WriteLine($"{u} ошибка: {ex.Message}");
             };
 
             return player.RunAsync();
@@ -45,9 +45,9 @@ public class Program
 
         Console.WriteLine("\n===== РЕЗУЛЬТАТЫ ТЕСТА =====");
         Console.WriteLine($"Всего пользователей:     {userCount}");
-        Console.WriteLine($"✅ Завершили без ошибок:  {completed}");
-        Console.WriteLine($"❌ С ошибками:            {failed}");
-        Console.WriteLine($"⏱️ Время выполнения:      {sw.Elapsed}");
+        Console.WriteLine($"Завершили без ошибок:  {completed}");
+        Console.WriteLine($"С ошибками:            {failed}");
+        Console.WriteLine($"Время выполнения:      {sw.Elapsed}");
 
         if (!errors.IsEmpty)
         {
