@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Server.Data;
@@ -11,9 +12,11 @@ using Server.Data;
 namespace Server.Migrations
 {
     [DbContext(typeof(UnitOfWork))]
-    partial class UnitOfWorkModelSnapshot : ModelSnapshot
+    [Migration("20250405115738_AddedUniqueIndexOnPlayerIdWithActiveGame")]
+    partial class AddedUniqueIndexOnPlayerIdWithActiveGame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,10 +34,6 @@ namespace Server.Migrations
                     b.Property<string>("State")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("WinningCells")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
 
                     b.HasKey("UUID");
 

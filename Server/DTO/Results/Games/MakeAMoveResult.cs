@@ -1,12 +1,12 @@
 ﻿using Server.DataModel;
 
-namespace Server.DTO.Results;
+namespace Server.DTO.Results.Games;
 
 public class MakeAMoveResult
 {
     public Game Game { get; set; }
 
-    public bool GameIsFinished => Game?.IsFinished ?? false;
+    public bool GameIsFinished { get; set; }
     
     public string ErrorMessage { get; set; }
     

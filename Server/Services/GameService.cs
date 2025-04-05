@@ -22,9 +22,9 @@ public class GameService(IUnitOfWork unitOfWork, IBotManager botManager) : IGame
         return Result.Ok(game);
     }
 
-    public async Task<Result<Game>> MakeAMoveAsync(GameSession game, int row, int column)
+    public async Task<Result<Game>> MakeAMoveAsync(GameSession session, int row, int column)
     {
-        var field = game.Game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
+        var field = session.Game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
 
         if (field == null)
             return Result.Fail<Game>(GameMessages.UnableToSetCell_UnknownCell);
@@ -35,10 +35,11 @@ public class GameService(IUnitOfWork unitOfWork, IBotManager botManager) : IGame
         //TODO: не стоит хардкодить, времени мало, потом можно будет доделать
         field.Char = "X";
         
-        if (game.Player2Id == TicTacToeConstants.BotId)
-            game.Game = botManager.MakeMove(game.Game);
+        if (session.Player2Id == TicTacToeConstants.BotId)
+            session.Game = botManager.MakeMove(session.Game);
         
-        game.Game = await unitOfWork.GamesRepository.UpdateAsync(game.Game);
-        return Result.Ok(game.Game);
+        session.Game = await unitOfWork.GamesRepository.UpdateAsync(session.Game);
+        
+        return Result.Ok(session.Game);
     }
 }

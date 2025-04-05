@@ -17,6 +17,12 @@ public interface IGameSessionManager
 	public Task<Result<GameSession>> Join(string playerId, string joinCode);
 	
 	/// <summary>
+	/// Покинуть сессию
+	/// </summary>
+	/// <param name="playerId">ID второго игрока</param>
+	public Task<Result<GameSession>> Leave(string playerId, string joinCode);
+	
+	/// <summary>
 	/// Создать сессию для игрока
 	/// </summary>
 	/// <param name="playerId">ID игрока</param>

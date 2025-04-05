@@ -9,6 +9,7 @@ using ArtificialIntelligence.AI.Interfaces;
 using MessageQueue.Extensions;
 using Server.Middlewares;
 using Server.OpponentManager;
+using Server.SignalR;
 
 namespace Server;
 
@@ -40,6 +41,7 @@ public class Program
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession();
         builder.Services.AddRabbitMq(builder.Configuration);
+        builder.Services.AddSignalR();
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
@@ -60,7 +62,7 @@ public class Program
         app.UseSession();
         app.UseMiddleware<ImplicitRegistrationMiddleware>();
         app.MapControllers();
-
+        app.MapHub<GameHub>("/gameHub");
         app.Run();
     }
 }

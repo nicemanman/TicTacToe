@@ -19,7 +19,12 @@ public class GameMapper : Profile
             })
             .ForMember(x=>x.JoinCode, 
                 expression => expression.MapFrom(x=>x.JoinCode))
-            .ForMember(x => x.State, expression => expression.MapFrom(x => x.Game.State));
+            .ForMember(x => x.State, 
+                expression => expression.MapFrom(x => x.GameState))
+            .ForMember(x=>x.SessionId, 
+                expression => expression.MapFrom(x => x.UUID))
+            .ForMember(x=>x.WinningCells, 
+                expression => expression.MapFrom(x => x.Game.WinningCells));
         
         CreateMap<Game, AIGame>()
             .ForMember(dst => dst.Board, expression =>
@@ -31,7 +36,16 @@ public class GameMapper : Profile
             .ForMember(dst => dst.GameMap, expression =>
             {
                 expression.Ignore();
-            });
+            })
+            .ForMember(dst => dst.State, 
+                expression => expression.MapFrom(x=>x.State))
+            .ForMember(dst => dst.WinningCells, opt => opt.MapFrom(src =>
+                src.WinningCells.Select(cell => new CellCoord
+                {
+                    Row = cell.Item1,
+                    Col = cell.Item2
+                }).ToList()
+            ));
     }
 
     private GameMap MapGameBoardToGameMap(IBoard board)

@@ -33,6 +33,7 @@ public class Program
             });
         
         builder.Services.AddScoped<GameService>();
+        builder.Services.AddScoped<UsernameService>();
         
         var app = builder.Build();
 
@@ -51,6 +52,7 @@ public class Program
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+
 
         app.Run();
     }

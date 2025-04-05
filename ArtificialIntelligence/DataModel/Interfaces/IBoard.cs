@@ -49,12 +49,12 @@ public interface IBoard
     /// <summary>
     /// Есть ли у игрока выигрышные ряды
     /// </summary>
-    bool CheckIfPlayerHasRowsSet();
+    bool CheckIfPlayerHasRowsSet(out List<(int, int)> cells);
 
     /// <summary>
     /// Есть ли у оппонента выигрышные ряды
     /// </summary>
-    bool CheckIfOpponentHasRowsSet();
+    bool CheckIfOpponentHasRowsSet(out List<(int, int)> cells);
 
     /// <summary>
     /// Есть ли еще свободные клетки, куда можно сделать ход

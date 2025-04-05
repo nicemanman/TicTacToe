@@ -170,11 +170,12 @@ public class GameController : Controller
                     Game = _mapper.Map<GameSession, GameDTO>(makeAMoveResult.Value)
                 });
             
-            TryGetWinnerMessage(makeAMoveResult.Value.Game, out var outcome);
+            TryGetWinnerMessage(makeAMoveResult.Value, out var outcome);
             
-            return Ok(new MakeAMoveGameIsFinishedResponse()
+            return Ok(new MakeAMoveSuccessResponse()
             {
-                Message = outcome
+                Message = outcome,
+                Game = _mapper.Map<GameSession, GameDTO>(makeAMoveResult.Value)
             });
 
         }
@@ -189,14 +190,14 @@ public class GameController : Controller
         }
     }
     
-    private static bool TryGetWinnerMessage(Game game, out string message)
+    private static bool TryGetWinnerMessage(GameSession game, out string message)
     {
         message = string.Empty;
         
-        if (!game.IsFinished)
+        if (!game.IsGameFinished)
             return false;
         
-        switch (game.State)
+        switch (game.GameState)
         {
             case GameState.Tie:
                 message = GameMessages.GameFinished_ItsATie;

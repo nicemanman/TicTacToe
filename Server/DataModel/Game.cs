@@ -8,7 +8,7 @@ public class Game : IEntity
     
     public GameMap GameMap { get; init; }
 
-    public GameState State { get; init; } = GameState.InProgress;
-
-    public bool IsFinished => State is GameState.Tie or GameState.Player2Win or GameState.Player1Win;
+    public List<CellCoord> WinningCells { get; init; } = [];
+    
+    public GameState State { get; set; }
 }

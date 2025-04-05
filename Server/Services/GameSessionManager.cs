@@ -2,12 +2,14 @@
 using Localization.GameSession;
 using MessageQueue.DataModel;
 using MessageQueue.Services.Interfaces;
-using RabbitMQ.Client;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Server.Data.Interfaces;
 using Server.DataModel;
 using Server.Exceptions.GameSessionExceptions;
 using Server.OpponentManager;
 using Server.Services.Interfaces;
+using Server.SignalR;
 
 namespace Server.Services;
 
@@ -21,7 +23,8 @@ public class GameSessionManager(
 	IGameService gameService,
 	IJoinCodeService joinCodeService,
 	IMqClient mqClient,
-	IBotManager botManager) : IGameSessionManager
+	IBotManager botManager,
+	IHubContext<GameHub> hubContext) : IGameSessionManager
 {
 	public async Task<Result<GameSession>> RegisterActivity(string playerId)
 	{
@@ -46,9 +49,6 @@ public class GameSessionManager(
 
 		if (session == null)
 			return Result.Fail<GameSession>(GameSessionMessages.SessionNotFound);
-
-		if (session.Player1Id == session.Player2Id)
-			return Result.Fail<GameSession>(GameSessionMessages.YouAlreadyJoined);
 		
 		if (!string.IsNullOrWhiteSpace(session.Player2Id) && session.Player2Id != playerId)
 			return Result.Fail<GameSession>(GameSessionMessages.SessionIsFull);
@@ -63,10 +63,14 @@ public class GameSessionManager(
 		return Result.Ok(updatedSession);;
 	}
 
+	public async Task<Result<GameSession>> Leave(string playerId, string joinCode)
+	{
+		throw new NotImplementedException();
+	}
+
 	public async Task<Result<GameSession>> StartParty(string playerId, bool againstBot = false)
 	{
 		GameSession session = await FindByPlayer(playerId);
-
 		if (session is { IsGameFinished: false })
 			return Result.Fail<GameSession>(GameSessionMessages.SessionAlreadyCreated);
 
@@ -83,10 +87,21 @@ public class GameSessionManager(
 				Player1Id = playerId,
 				Player2Id = TicTacToeConstants.BotId,
 				JoinCode = string.Empty,
-				Game = result.Value
+				Game = result.Value,
+				GameState = GameState.InProgress
 			};
-			
-			var playWithBotSession = await unitOfWork.GameSessionRepository.CreateAsync(session);
+
+			GameSession playWithBotSession;
+
+			try
+			{
+				playWithBotSession = await unitOfWork.GameSessionRepository.CreateAsync(session);
+			}
+			catch (DbUpdateException ex) 
+				when (ex.InnerException?.Message?.Contains("IX_GameSessions_Player1Id") ?? false)
+			{
+				return Result.Fail<GameSession>(GameSessionMessages.SessionAlreadyCreated);
+			}
 
 			bool isBotFirst = new Random().Next(1, 3) == 1;
 			
@@ -116,7 +131,8 @@ public class GameSessionManager(
 			Player1Id = playerId,
 			PlayerIdTurn = playerId,
 			JoinCode = joinCode,
-			Game = result.Value
+			Game = result.Value,
+			GameState = result.Value.State
 		};
 
 		var createdSession = await unitOfWork.GameSessionRepository.CreateAsync(session);
@@ -140,7 +156,9 @@ public class GameSessionManager(
 	private async Task<GameSession> FindByPlayer(string playerId)
 	{
 		var session = await unitOfWork.GameSessionRepository
-			.FirstOrDefault(s => s.Player1Id == playerId || s.Player2Id == playerId);
+			.FirstOrDefault(s => 
+				(s.Player1Id == playerId || s.Player2Id == playerId) 
+			                     && s.GameState == GameState.InProgress);
 
 		return session;
 	}
@@ -148,7 +166,8 @@ public class GameSessionManager(
 	private async Task<GameSession> FindByJoinCode(string joinCode)
 	{
 		var session = await unitOfWork.GameSessionRepository
-			.FirstOrDefault(s => s.JoinCode == joinCode);
+			.FirstOrDefault(s => 
+				s.JoinCode == joinCode && s.GameState == GameState.InProgress);
 
 		return session;
 	}
@@ -170,7 +189,7 @@ public class GameSessionManager(
 			return Result.Fail<GameSession>(GameMessages.UnableToSetCell_NotYourTurn);
 		
 		var makeMoveResult = await gameService.MakeAMoveAsync(session, row, column);
-		
+		session.GameState = session.Game.State;
 		if (makeMoveResult.Failure)
 			return Result.Fail<GameSession>(makeMoveResult.Error);
 
@@ -178,17 +197,30 @@ public class GameSessionManager(
 
 		if (session.Player2Id != TicTacToeConstants.BotId)
 		{
-			string nextTurnPlayer = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id;
+			string nextTurnPlayer = session.Player1Id == currentUserId 
+				? session.Player2Id : session.Player1Id;
+			
 			session.PlayerIdTurn = nextTurnPlayer;
 		}
 		
 		var updatedSession = await unitOfWork.GameSessionRepository.UpdateAsync(session);
+		
+		if (session.Player2Id != TicTacToeConstants.BotId)
+		{
+			await mqClient.Send(new RabbitMessage()
+			{
+				SenderId = currentUserId,
+				Type = MessageType.Move,
+				SessionId = session.UUID.ToString(),
+				ReceiverId = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id
+			});
+		}
+		
 		return Result.Ok(updatedSession);
 	}
 	
-	private Task OnMessage(RabbitMessage message)
+	private async Task OnMessage(RabbitMessage message)
 	{
-		Console.WriteLine($"From: {message.SenderId}, message: {message.Payload}");
-		return Task.CompletedTask;
+		await hubContext.Clients.Group(message.SessionId).SendAsync("GameUpdated");
 	}
 }

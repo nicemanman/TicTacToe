@@ -15,9 +15,9 @@ public class MqTestController
 		var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
 		await mqClient.Send(new RabbitMessage()
 		{
-			Payload = "Hello!",
 			SenderId = userId,
-			ReceiverId = userId
+			ReceiverId = userId,
+			MessageType = MessageType.Move
 		});
 		
 		return Ok();

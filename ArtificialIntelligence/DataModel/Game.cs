@@ -17,20 +17,25 @@ public class Game : IGame
     /// </summary>
     public GameState State { get; private set; }
     
+    public List<(int, int)> WinningCells { get; set; }
+    
     /// <summary>
     /// <inheritdoc cref="IGame.UpdateGameState"/>
     /// </summary>
     public void UpdateGameState()
     {
-        if (Board.CheckIfPlayerHasRowsSet())
+        WinningCells = [];
+        if (Board.CheckIfPlayerHasRowsSet(out var playerCells))
         {
             State = GameState.PlayerWin;
+            WinningCells.AddRange(playerCells);
             return;
         }
 
-        if (Board.CheckIfOpponentHasRowsSet())
+        if (Board.CheckIfOpponentHasRowsSet(out var botCells))
         {
             State = GameState.BotWin;
+            WinningCells.AddRange(botCells);
             return;
         }
 

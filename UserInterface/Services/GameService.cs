@@ -35,4 +35,10 @@ public class GameService
         var response = await _httpClient.PatchAsync($"/api/game?row={row}&column={column}", null);
         return await response.Content.ReadFromJsonAsync<GameResponse>();
     }
+
+    public async Task Identify(string playerName)
+    {
+        var response = await _httpClient.PostAsync($"/api/Identification?username={playerName}", null);
+        response.EnsureSuccessStatusCode();
+    }
 }

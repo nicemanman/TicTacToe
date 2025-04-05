@@ -1,4 +1,5 @@
-﻿using Database.Interfaces;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Database.Interfaces;
 
 namespace Server.DataModel;
 
@@ -20,5 +21,8 @@ public class GameSession : IEntity
 	
 	public Game Game { get; set; }
 
-	public bool IsGameFinished => Game.IsFinished;
+	public GameState GameState { get; set; }
+	
+	public bool IsGameFinished => GameState != GameState.InProgress;
+	
 }

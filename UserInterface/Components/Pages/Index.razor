@@ -4,20 +4,103 @@
 @inject NavigationManager NavigationManager
 @inject ILogger<GameService> Logger
 
-<button @onclick="StartNewGame">Начать новую игру</button>
-<button @onclick="ContinueGame">Продолжить предыдущую игру</button>
+<h3 class="title">Добро пожаловать в Крестики-Нолики</h3>
 
-@if (_startNewGame)
+<div class="form-section">
+    <label for="nameInput">Введите ваше имя:</label>
+    <input id="nameInput" @bind="PlayerName" class="name-input" placeholder="Ваше имя" />
+</div>
+
+@if (string.IsNullOrWhiteSpace(PlayerName))
 {
-    <div>
-        <span>С кем вы хотите сыграть?</span>
-        <button @onclick="async () => await CreateGame(true)">С ботом</button>
-        <button @onclick="async () => await CreateGame(false)">С другом</button>
+    <div class="validation-message">Пожалуйста, введите имя, чтобы начать</div>
+}
+else
+{
+    <div class="button-section">
+        <button class="main-button" @onclick="StartNewGame">Начать новую игру</button>
+        <button class="main-button" @onclick="ContinueGame">Продолжить игру</button>
     </div>
 }
 
+@if (_startNewGame)
+{
+    <div class="choice-section">
+        <p>С кем вы хотите сыграть?</p>
+        <button class="choice-button" @onclick="async () => await CreateGame(true)">С ботом</button>
+        <button class="choice-button" @onclick="async () => await CreateGame(false)">С другом</button>
+    </div>
+}
+
+<style>
+    .title {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .form-section {
+        margin-bottom: 10px;
+    }
+
+    .name-input {
+        padding: 8px;
+        font-size: 16px;
+        width: 250px;
+    }
+
+    .validation-message {
+        color: red;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+
+    .button-section {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .main-button {
+        margin-right: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #337ab7;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .main-button:hover {
+        background-color: #286090;
+    }
+
+    .choice-section {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        display: inline-block;
+        background-color: #f9f9f9;
+    }
+
+    .choice-button {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 14px;
+        background-color: #5cb85c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .choice-button:hover {
+        background-color: #449d44;
+    }
+</style>
+
 @code {
-    private bool _startNewGame;
+    private bool _startNewGame = false;
+    private string PlayerName = "";
 
     private void StartNewGame()
     {
@@ -27,15 +110,16 @@
     private void ContinueGame()
     {
         _startNewGame = false;
-        // Здесь мы перенаправляем пользователя на компонент игры, который автоматически попытается загрузить текущую игру
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }
 
     private async Task CreateGame(bool againstBot)
     {
         _startNewGame = false;
+        
+        await GameService.Identify(PlayerName);
+
         await GameService.CreateGame(againstBot);
-        // После создания новой игры перенаправляем пользователя на компонент игры
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }
 }
