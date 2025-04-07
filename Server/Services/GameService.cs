@@ -22,7 +22,7 @@ public class GameService(IUnitOfWork unitOfWork, IBotManager botManager) : IGame
         return Result.Ok(game);
     }
 
-    public async Task<Result<Game>> MakeAMoveAsync(GameSession session, int row, int column)
+    public async Task<Result<Game>> MakeAMoveAsync(GameSession session, int row, int column, string ch)
     {
         var field = session.Game.GameMap.Fields.FirstOrDefault(x => x.Row == row && x.Column == column);
 
@@ -32,8 +32,7 @@ public class GameService(IUnitOfWork unitOfWork, IBotManager botManager) : IGame
         if (!string.IsNullOrWhiteSpace(field.Char))
             return Result.Fail<Game>(GameMessages.UnableToSetCell_AlreadySet);
         
-        //TODO: не стоит хардкодить, времени мало, потом можно будет доделать
-        field.Char = "X";
+        field.Char = ch;
         
         if (session.Player2Id == TicTacToeConstants.BotId)
             session.Game = botManager.MakeMove(session.Game);

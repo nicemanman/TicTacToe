@@ -1,11 +1,14 @@
-﻿using Localization.Game;
+﻿using AutoMapper;
+using Localization.Game;
 using Localization.GameSession;
 using MessageQueue.DataModel;
 using MessageQueue.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Server.Data.Interfaces;
 using Server.DataModel;
+using Server.DTO;
 using Server.Exceptions.GameSessionExceptions;
 using Server.OpponentManager;
 using Server.Services.Interfaces;
@@ -24,7 +27,8 @@ public class GameSessionManager(
 	IJoinCodeService joinCodeService,
 	IMqClient mqClient,
 	IBotManager botManager,
-	IHubContext<GameHub> hubContext) : IGameSessionManager
+	IHubContext<GameHub> hubContext,
+	IMapper mapper) : IGameSessionManager
 {
 	public async Task<Result<GameSession>> RegisterActivity(string playerId)
 	{
@@ -57,6 +61,9 @@ public class GameSessionManager(
 			return Result.Ok(session);
 
 		session.Player2Id = playerId;
+
+		if (string.IsNullOrWhiteSpace(session.PlayerIdTurn))
+			session.PlayerIdTurn = playerId;
 		
 		var updatedSession = await unitOfWork.GameSessionRepository.UpdateAsync(session);
 		await mqClient.Subscribe(playerId, OnMessage);
@@ -188,8 +195,9 @@ public class GameSessionManager(
 		if (session.Player2Id != TicTacToeConstants.BotId && currentUserId != session.PlayerIdTurn)
 			return Result.Fail<GameSession>(GameMessages.UnableToSetCell_NotYourTurn);
 		
-		var makeMoveResult = await gameService.MakeAMoveAsync(session, row, column);
-		session.GameState = session.Game.State;
+		string ch = session.Player1Id == currentUserId ? "X" : "O";
+		
+		var makeMoveResult = await gameService.MakeAMoveAsync(session, row, column, ch);
 		if (makeMoveResult.Failure)
 			return Result.Fail<GameSession>(makeMoveResult.Error);
 
@@ -202,25 +210,105 @@ public class GameSessionManager(
 			
 			session.PlayerIdTurn = nextTurnPlayer;
 		}
+
+		var result = CheckWinner(session.Game.GameMap.Fields);
+		session.Game.State = result.state;
+		session.Game.WinningCells = result.winningCells;
+		session.GameState = session.Game.State;
 		
 		var updatedSession = await unitOfWork.GameSessionRepository.UpdateAsync(session);
 		
+		var gameDto = mapper.Map<GameSession, GameDTO>(updatedSession);
 		if (session.Player2Id != TicTacToeConstants.BotId)
+		{
+			var message = new RabbitMessage()
+			{
+				SenderId = currentUserId,
+				SessionId = session.UUID.ToString(),
+				ReceiverId = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id,
+				Payload = gameDto
+			};
+			
+			if (session.GameState == GameState.InProgress)
+				message.MessageType = MessageType.Move;
+			else
+				message.MessageType = MessageType.GameOver;
+			
+			await mqClient.Send(message);
+		}
+		else
 		{
 			await mqClient.Send(new RabbitMessage()
 			{
 				SenderId = currentUserId,
-				Type = MessageType.Move,
+				MessageType = MessageType.GameOver,
 				SessionId = session.UUID.ToString(),
-				ReceiverId = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id
+				ReceiverId = session.Player1Id == currentUserId ? session.Player2Id : session.Player1Id,
+				Payload = gameDto
 			});
 		}
-		
 		return Result.Ok(updatedSession);
 	}
 	
+	public static (GameState state, List<CellCoord> winningCells) CheckWinner(List<GameMapField> fields)
+	{
+		var board = new string[3, 3];
+		var winningCells = new List<CellCoord>();
+
+		// Заполняем двумерный массив
+		foreach (var field in fields)
+		{
+			board[field.Row, field.Column] = field.Char;
+		}
+
+		// Проверка всех победных комбинаций
+		var lines = new List<List<CellCoord>>
+		{
+			// Горизонтали
+			new() { new(0,0), new(0,1), new(0,2) },
+			new() { new(1,0), new(1,1), new(1,2) },
+			new() { new(2,0), new(2,1), new(2,2) },
+
+			// Вертикали
+			new() { new(0,0), new(1,0), new(2,0) },
+			new() { new(0,1), new(1,1), new(2,1) },
+			new() { new(0,2), new(1,2), new(2,2) },
+
+			// Диагонали
+			new() { new(0,0), new(1,1), new(2,2) },
+			new() { new(0,2), new(1,1), new(2,0) },
+		};
+
+		foreach (var line in lines)
+		{
+			var chars = line.Select(c => board[c.Row, c.Col]).ToArray();
+
+			if (chars.All(c => c == "X"))
+			{
+				winningCells = line;
+				return (GameState.Player1Win, winningCells);
+			}
+
+			if (chars.All(c => c == "O"))
+			{
+				winningCells = line;
+				return (GameState.Player2Win, winningCells);
+			}
+		}
+
+		// Проверка на ничью
+		if (fields.All(f => !string.IsNullOrEmpty(f.Char)))
+		{
+			return (GameState.Tie, new List<CellCoord>());
+		}
+
+		// Игра ещё не закончена
+		return (GameState.InProgress, new List<CellCoord>());
+	}
+
+	
 	private async Task OnMessage(RabbitMessage message)
 	{
-		await hubContext.Clients.Group(message.SessionId).SendAsync("GameUpdated");
+		await hubContext.Clients.Group(message.SessionId).SendAsync("GameUpdated", JsonConvert.SerializeObject(message.Payload));
 	}
 }

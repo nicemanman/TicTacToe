@@ -34,10 +34,16 @@ public class UnitOfWork : BaseUnitOfWork, IUnitOfWork
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<GameSession>().HasIndex(x => x.Player1Id)
+        modelBuilder.Entity<GameSession>()
+            .HasIndex(x => x.Player1Id)
             .IsUnique()
             .HasFilter("'GameState'='InProgress'");
             
+        modelBuilder.Entity<GameSession>()
+            .HasIndex(x => x.Player2Id)
+            .IsUnique()
+            .HasFilter("'GameState'='InProgress'");
+        
         modelBuilder.Entity<Game>().OwnsOne(x => x.GameMap, builder =>
         {
             builder.OwnsMany(x => x.Fields);

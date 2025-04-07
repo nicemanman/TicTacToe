@@ -7,7 +7,7 @@ public class JoinCodeService : IJoinCodeService
 {
 	public string GetJoinCode()
 	{
-		var arr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#!?/:;,.-";
+		var arr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!?/:;,.-";
 		StringBuilder builder = new();
 		Random random = new();
 		

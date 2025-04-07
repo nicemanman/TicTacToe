@@ -12,4 +12,11 @@ public class IdentificationController : Controller
 		HttpContext.Session.SetString(TicTacToeConstants.UserNameField, username);
 		return Ok();
 	}
+	
+	[HttpGet]
+	public IActionResult GetId()
+	{
+		var id = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
+		return Ok(id);
+	}
 }

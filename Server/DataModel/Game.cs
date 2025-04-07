@@ -8,7 +8,7 @@ public class Game : IEntity
     
     public GameMap GameMap { get; init; }
 
-    public List<CellCoord> WinningCells { get; init; } = [];
+    public List<CellCoord> WinningCells { get; set; } = [];
     
     public GameState State { get; set; }
 }

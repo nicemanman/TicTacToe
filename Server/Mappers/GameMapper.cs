@@ -19,6 +19,8 @@ public class GameMapper : Profile
             })
             .ForMember(x=>x.JoinCode, 
                 expression => expression.MapFrom(x=>x.JoinCode))
+            .ForMember(x=>x.PlayerIdTurn, 
+                expression => expression.MapFrom(x=>x.PlayerIdTurn))
             .ForMember(x => x.State, 
                 expression => expression.MapFrom(x => x.GameState))
             .ForMember(x=>x.SessionId, 
@@ -40,11 +42,7 @@ public class GameMapper : Profile
             .ForMember(dst => dst.State, 
                 expression => expression.MapFrom(x=>x.State))
             .ForMember(dst => dst.WinningCells, opt => opt.MapFrom(src =>
-                src.WinningCells.Select(cell => new CellCoord
-                {
-                    Row = cell.Item1,
-                    Col = cell.Item2
-                }).ToList()
+                src.WinningCells.Select(cell => new CellCoord(cell.Item1, cell.Item2)).ToList()
             ));
     }
 

@@ -2,9 +2,15 @@
 @using UserInterface.DTO
 @using UserInterface.Services
 @using Microsoft.AspNetCore.SignalR.Client
+@using UserInterface.Data
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using MessageQueue.DataModel
+@using Newtonsoft.Json
 @inject GameService GameService
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
+@inject CookieData Cookies
+@inject ProtectedLocalStorage ProtectedStorage
 
 <h3 class="game-title">Крестики-нолики</h3>
 
@@ -16,6 +22,20 @@
             <span>Подключитесь по коду: <strong>@_gameResponse.Game.JoinCode</strong></span>
         </div>
     }
+
+    @if (!IsBot && _gameResponse.Game.State == "InProgress")
+    {
+        <div class="turn-indicator @(IsMyTurn ? "my-turn" : "waiting-turn")">
+            <span>
+                @(IsMyTurn ? "Сейчас ваш ход" : "Ход соперника")
+            </span>
+            @if (!IsMyTurn)
+            {
+                <span style="font-size: 20px;">⏳</span>
+            }
+        </div>
+    }
+    
     
     <div class="game-board">
         @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
@@ -24,7 +44,7 @@
                 @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys)
                 {
                     <button class="cell @(IsWinningCell(int.Parse(rowKey), int.Parse(columnKey)) ? "winner-cell" : "")"
-                            disabled="@(!string.IsNullOrEmpty(_gameResponse.Game.GameMap[rowKey][columnKey]))"
+                            disabled="@(!IsMyTurn || !string.IsNullOrEmpty(_gameResponse.Game.GameMap[rowKey][columnKey]))"
                             @onclick="() => MakeMove(int.Parse(rowKey), int.Parse(columnKey))">
                         @_gameResponse.Game.GameMap[rowKey][columnKey]
                     </button>
@@ -148,18 +168,34 @@ else if (_gameResponse?.Error != null)
         color: #000 !important;
         font-weight: 900;
     }
+    
+   .turn-indicator {
+       text-align: center;
+       margin: 20px auto;
+       font-size: 20px;
+       font-weight: bold;
+       padding: 10px 20px;
+       border-radius: 10px;
+       background-color: #f5f5f5;
+       border: 1px solid #ccc;
+       width: fit-content;
+   }
 </style>
 
 @code {
     private HubConnection _hubConnection;
     private GameResponse _gameResponse;
+    private bool IsMyTurn = false;
+    private bool IsBot = false;
+    private string CurrentUserId;
 
+    
     [Inject] protected IConfiguration Configuration { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         _gameResponse = await GameService.GetGame();
-        
+        CurrentUserId = await GameService.GetCurrentUserId();
         if (_gameResponse.Game == null)
             NavigationManager.NavigateTo("/");
         
@@ -168,10 +204,19 @@ else if (_gameResponse?.Error != null)
             .WithAutomaticReconnect()
             .Build();
 
-        _hubConnection.On<Game>("GameUpdated", updatedGame =>
+        _hubConnection.On<string>("GameUpdated", async (response) =>
         {
-            _gameResponse.Game = updatedGame;
-            StateHasChanged();
+            try
+            {
+                _gameResponse.Game = JsonConvert.DeserializeObject<RabbitMessage>(response).Payload as Game;
+                IsMyTurn = _gameResponse.Game.PlayerIdTurn == CurrentUserId;
+
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Ошибка при обновлении игры: {ex.Message}");
+            }
         });
 
         await _hubConnection.StartAsync();
@@ -179,6 +224,8 @@ else if (_gameResponse?.Error != null)
         if (!string.IsNullOrEmpty(_gameResponse.Game?.SessionId))
         {
             await _hubConnection.InvokeAsync("JoinSession", _gameResponse.Game.SessionId);
+            IsBot = _gameResponse.Game.Player2Id == "AI";
+            IsMyTurn = _gameResponse.Game.PlayerIdTurn == CurrentUserId || IsBot;
         }
     }
 
@@ -190,6 +237,9 @@ else if (_gameResponse?.Error != null)
 
     private async Task MakeMove(int row, int column)
     {
+        if (!IsMyTurn)
+            return;
+        
         var response = await GameService.MakeMove(row, column);
 
         if (response.Game == null && response.Error != null)
@@ -197,6 +247,9 @@ else if (_gameResponse?.Error != null)
 
         _gameResponse.Game = response.Game;
         _gameResponse.Message = response.Message;
+        
+        if (!IsBot)
+            IsMyTurn = false; // Ждём сигнал от противника
     }
 
     private async Task CreateGame(bool againstBot)

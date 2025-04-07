@@ -17,6 +17,10 @@ public class Game
     public string JoinCode { get; set; }
     
     public string SessionId { get; set; }
+    
+    public string Player2Id { get; set; }
+    
+    public string PlayerIdTurn { get; set; }
 }
 
 public class CellCoord

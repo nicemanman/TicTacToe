@@ -7,5 +7,5 @@ public interface IGameService
 {
     public Task<Result<Game>> CreateAsync();
     
-    Task<Result<Game>> MakeAMoveAsync(GameSession session, int row, int column);
+    Task<Result<Game>> MakeAMoveAsync(GameSession session, int row, int column, string ch);
 }

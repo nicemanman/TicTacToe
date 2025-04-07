@@ -7,12 +7,13 @@ public class RabbitMessage
 	
 	public string SessionId { get; set; }
 	
-	public MessageType Type { get; set; }
+	public MessageType MessageType { get; set; }
 	
-	public MessageType MessageType { get; init; }
+	public object Payload { get; init; }
 }
 
 public enum MessageType
 {
-	Move
+	Move,
+	GameOver
 }

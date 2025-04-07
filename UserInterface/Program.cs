@@ -1,5 +1,8 @@
+using BitzArt.Blazor.Cookies;
 using NLog.Extensions.Logging;
 using UserInterface.Components;
+using UserInterface.Data;
+using UserInterface.MessageHandlers;
 using UserInterface.Services;
 
 namespace UserInterface;
@@ -13,28 +16,29 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+        
         builder.Services.AddLogging(x =>
         {
             x.ClearProviders();
             x.AddNLog();
         });
-        
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddHttpClient("MyClient", client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("TicTacToeServer"));
             })
-            .ConfigurePrimaryHttpMessageHandler(() =>
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                return new HttpClientHandler
-                {
-                    UseCookies = true,
-                    CookieContainer = new System.Net.CookieContainer()
-                };
-            });
+                UseCookies = false
+            })
+            .AddHttpMessageHandler<CopyCookieHandler>()
+            .SetHandlerLifetime(TimeSpan.FromDays(1));
         
+        builder.Services.AddTransient<CopyCookieHandler>();
         builder.Services.AddScoped<GameService>();
-        builder.Services.AddScoped<UsernameService>();
-        
+        builder.Services.AddScoped<UsernameData>();
+        builder.Services.AddScoped<CookieData>();
+        builder.AddBlazorCookies();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

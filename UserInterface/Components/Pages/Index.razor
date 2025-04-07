@@ -1,34 +1,54 @@
 ﻿@page "/"
 @using UserInterface.Services
+@using UserInterface.Data
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject GameService GameService
 @inject NavigationManager NavigationManager
-@inject ILogger<GameService> Logger
+@inject CookieData Cookies
+@inject ProtectedLocalStorage ProtectedStorage
 
-<h3 class="title">Добро пожаловать в Крестики-Нолики</h3>
+<h3 class="title">Крестики-нолики</h3>
 
 <div class="form-section">
-    <label for="nameInput">Введите ваше имя:</label>
-    <input id="nameInput" @bind="PlayerName" class="name-input" placeholder="Ваше имя" />
+    <label>Ваше имя:</label>
+    <input @bind="PlayerName" class="name-input" />
 </div>
 
-@if (string.IsNullOrWhiteSpace(PlayerName))
-{
-    <div class="validation-message">Пожалуйста, введите имя, чтобы начать</div>
-}
-else
-{
-    <div class="button-section">
-        <button class="main-button" @onclick="StartNewGame">Начать новую игру</button>
-        <button class="main-button" @onclick="ContinueGame">Продолжить игру</button>
-    </div>
-}
+<div class="button-section">
+    <button class="main-button"
+            disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+            @onclick="() => StartNewGame()">Новая игра</button>
 
-@if (_startNewGame)
+    <button class="main-button"
+            disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+            @onclick="() => ContinueGame()">Продолжить</button>
+</div>
+
+
+@if (_selectGameMode)
 {
     <div class="choice-section">
         <p>С кем вы хотите сыграть?</p>
-        <button class="choice-button" @onclick="async () => await CreateGame(true)">С ботом</button>
-        <button class="choice-button" @onclick="async () => await CreateGame(false)">С другом</button>
+        <button class="choice-button" @onclick="() => CreateGame(true)">С ботом</button>
+        <button class="choice-button" @onclick="() => WithFriend()">С другом</button>
+    </div>
+}
+
+@if (_joinFriendMode)
+{
+    <div class="friend-mode">
+        <button class="choice-button" @onclick="() => CreateGame(false)">Создать игру</button>
+
+        <div style="margin-top: 15px;">
+            <label>Введите код для подключения:</label>
+            <input @bind="JoinCodeInput" />
+            <button class="choice-button" @onclick="JoinFriendGame">Подключиться</button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(JoinError))
+        {
+            <div class="error-message">@JoinError</div>
+        }
     </div>
 }
 
@@ -96,30 +116,67 @@ else
     .choice-button:hover {
         background-color: #449d44;
     }
+	
+	.main-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 </style>
 
 @code {
-    private bool _startNewGame = false;
     private string PlayerName = "";
+    private bool _selectGameMode = false;
+    private bool _joinFriendMode = false;
 
+    private string JoinCodeInput;
+    private string JoinError;
+    
     private void StartNewGame()
     {
-        _startNewGame = true;
+        _selectGameMode = true;
     }
 
     private void ContinueGame()
     {
-        _startNewGame = false;
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }
 
     private async Task CreateGame(bool againstBot)
     {
-        _startNewGame = false;
-        
+        JoinError = null;
         await GameService.Identify(PlayerName);
-
         await GameService.CreateGame(againstBot);
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+    }
+
+    private void WithFriend()
+    {
+        _selectGameMode = false;
+        _joinFriendMode = true;
+    }
+
+    private async Task JoinFriendGame()
+    {
+        JoinError = null;
+
+        if (string.IsNullOrWhiteSpace(JoinCodeInput))
+        {
+            JoinError = "Введите код подключения.";
+            return;
+        }
+
+        await GameService.Identify(PlayerName);
+
+        var success = await GameService.JoinGame(JoinCodeInput);
+        if (!success)
+        {
+            JoinError = "Не удалось подключиться. Проверьте код.";
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+        }
     }
 }

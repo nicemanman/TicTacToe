@@ -69,7 +69,7 @@ public class GameController : Controller
     {
         try
         {
-            var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
+             var userId = HttpContext.Session.GetString(TicTacToeConstants.UserIdField);
             
             var result = await _gameSessionManager.Join(userId, joinCode);
                 
