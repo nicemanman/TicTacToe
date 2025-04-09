@@ -21,17 +21,17 @@ services:
       RESHARPER_LOG_CONF: "/etc/opt/rider-debugger/backend-log.xml"
     image: "tic-tac-toe-server:dev"
     ports:
-    - "127.0.0.1:57085:57100"
-    - "127.0.0.1:57285:57300"
+    - "127.0.0.1:57000:57100"
+    - "127.0.0.1:57200:57300"
     volumes:
     - "C:\\Users\\IFalko\\.nuget\\packages:/home/app/.nuget/packages"
     - "C:\\0Repository\\TicTacToe\\Server:/app:rw"
     - "C:\\0Repository\\TicTacToe:/src:rw"
-    - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2023.3.3\\\
+    - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2023.3.6\\\
       Linux64:/opt/rider-debugger"
     - "C:\\Program Files\\JetBrains\\JetBrains Rider 2023.3.3\\bin:/etc/opt/rider-debugger/backend-log.xml"
     - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\Rider2023.3\\log\\DebuggerWorker\\\
-      JetBrains.Debugger.Worker.2024_3_24_01_21_03:/var/opt/rider-debugger:rw"
+      JetBrains.Debugger.Worker.2025_4_09_13_03_25:/var/opt/rider-debugger:rw"
     working_dir: "/app"
   ui:
     build:
@@ -55,15 +55,15 @@ services:
       RESHARPER_LOG_CONF: "/etc/opt/rider-debugger/backend-log.xml"
     image: "tic-tac-toe-ui:dev"
     ports:
-    - "127.0.0.1:57086:57100"
-    - "127.0.0.1:57286:57300"
+    - "127.0.0.1:57001:57100"
+    - "127.0.0.1:57201:57300"
     volumes:
     - "C:\\Users\\IFalko\\.nuget\\packages:/home/app/.nuget/packages"
     - "C:\\0Repository\\TicTacToe\\UserInterface:/app:rw"
     - "C:\\0Repository\\TicTacToe:/src:rw"
-    - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2023.3.3\\\
+    - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\RiderRemoteDebugger\\2023.3.6\\\
       Linux64:/opt/rider-debugger"
     - "C:\\Program Files\\JetBrains\\JetBrains Rider 2023.3.3\\bin:/etc/opt/rider-debugger/backend-log.xml"
     - "C:\\Users\\IFalko\\AppData\\Local\\JetBrains\\Rider2023.3\\log\\DebuggerWorker\\\
-      JetBrains.Debugger.Worker.2024_3_24_01_21_03:/var/opt/rider-debugger:rw"
+      JetBrains.Debugger.Worker.2025_4_09_13_03_25:/var/opt/rider-debugger:rw"
     working_dir: "/app"
