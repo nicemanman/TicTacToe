@@ -1,16 +1,14 @@
-﻿using AutoMapper;
-using ArtificialIntelligence.AI;
-using ArtificialIntelligence.AI.Interfaces;
-using ArtificialIntelligence.DataModel;
+﻿using ArtificialIntelligence.AI.Interfaces;
+using AutoMapper;
 using AIGame = ArtificialIntelligence.DataModel.Game;
 using Game = Server.DataModel.Game;
 
-namespace Server.AI;
+namespace Server.OpponentManager;
 
 /// <summary>
 /// Реализация оппонента-искуственного интеллекта в игре крестики-нолики
 /// </summary>
-public class AiManager : IOpponentManager
+public class AiManager : IBotManager
 {
     private readonly IMapper _mapper;
     private readonly IBot _bot;
@@ -33,7 +31,7 @@ public class AiManager : IOpponentManager
             var field = game.GameMap.Fields.FirstOrDefault(x => x.Row == cell.Row && x.Column == cell.Column);
             field.Char = cell.Char;
         }
-        
+
         return game;
     }
 }

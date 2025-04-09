@@ -2,8 +2,8 @@
 
 public enum GameState
 {
-    PlayerWin,
-    BotWin,
+    Player1Win,
+    Player2Win,
     InProgress,
     Tie,
 }

@@ -69,15 +69,6 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил бот.
-        /// </summary>
-        public static string GameFinished_BotWin {
-            get {
-                return ResourceManager.GetString("GameFinished.BotWin", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Результат матча - ничья.
         /// </summary>
         public static string GameFinished_ItsATie {
@@ -87,7 +78,16 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил игрок.
+        ///   Looks up a localized string similar to Результат матча - победили нули.
+        /// </summary>
+        public static string GameFinished_OpponentWin {
+            get {
+                return ResourceManager.GetString("GameFinished.OpponentWin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Результат матча - победили иксы.
         /// </summary>
         public static string GameFinished_PlayerWin {
             get {
@@ -105,11 +105,29 @@ namespace Localization.Game {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ход противника.
+        /// </summary>
+        public static string OpponentsTurn {
+            get {
+                return ResourceManager.GetString("OpponentsTurn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Выбор в этом поле уже сделан.
         /// </summary>
         public static string UnableToSetCell_AlreadySet {
             get {
                 return ResourceManager.GetString("UnableToSetCell.AlreadySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Сейчас не ваш ход.
+        /// </summary>
+        public static string UnableToSetCell_NotYourTurn {
+            get {
+                return ResourceManager.GetString("UnableToSetCell.NotYourTurn", resourceCulture);
             }
         }
         

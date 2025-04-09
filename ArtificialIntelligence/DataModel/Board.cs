@@ -146,37 +146,63 @@ public class Board : IBoard
     /// <summary>
     /// <inheritdoc cref="IBoard.CheckIfPlayerHasRowsSet"/>
     /// </summary>
-    public bool CheckIfPlayerHasRowsSet()
+    public bool CheckIfPlayerHasRowsSet(out List<(int, int)> cells)
     {
-        return IsWinner(_player);
+        return IsWinner(_player, out cells);
     }
 
     /// <summary>
     /// <inheritdoc cref="IBoard.CheckIfOpponentHasRowsSet"/>
     /// </summary>
-    public bool CheckIfOpponentHasRowsSet()
+    public bool CheckIfOpponentHasRowsSet(out List<(int, int)> cells)
     {
-        return IsWinner(_opponent);
+        return IsWinner(_opponent, out cells);
     }
     
-    private bool IsWinner(string player)
+    private bool IsWinner(string player, out List<(int, int)> cells)
     {
-        if (board[0, 0] == player && board[0, 1] == player && board[0, 2] == player) 
+        cells = [];
+        
+        if (board[0, 0] == player && board[0, 1] == player && board[0, 2] == player)
+        {
+            cells = [(0,0), (0,1), (0, 2)];
             return true;
+        }
         if (board[1, 0] == player && board[1, 1] == player && board[1, 2] == player) 
+        {
+            cells = [(1,0), (1,1), (1, 2)];
             return true;
+        }
         if (board[2, 0] == player && board[2, 1] == player && board[2, 2] == player) 
+        {
+            cells = [(2,0), (2,1), (2, 2)];
             return true;
+        }
         if (board[0, 0] == player && board[1, 0] == player && board[2, 0] == player) 
+        {
+            cells = [(0,0), (1,0), (2, 0)];
             return true;
+        }
         if (board[0, 1] == player && board[1, 1] == player && board[2, 1] == player) 
+        {
+            cells = [(0,1), (1,1), (2, 1)];
             return true;
+        }
         if (board[0, 2] == player && board[1, 2] == player && board[2, 2] == player)
+        {
+            cells = [(0,2), (1,2), (2, 2)];
             return true;
+        }
         if (board[0, 0] == player && board[1, 1] == player && board[2, 2] == player) 
+        {
+            cells = [(0,0), (1,1), (2, 2)];
             return true;
+        }
         if (board[0, 2] == player && board[1, 1] == player && board[2, 0] == player) 
+        {
+            cells = [(0,2), (1,1), (2, 0)];
             return true;
+        }
         
         return false;
     }

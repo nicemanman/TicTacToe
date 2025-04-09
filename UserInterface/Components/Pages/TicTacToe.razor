@@ -1,57 +1,453 @@
 ﻿@page "/tictactoe"
 @using UserInterface.DTO
 @using UserInterface.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@using UserInterface.Data
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using MessageQueue.DataModel
+@using Newtonsoft.Json
 @inject GameService GameService
 @inject NavigationManager NavigationManager
-@if (_gameResponse != null && _gameResponse.Game != null)
+@implements IAsyncDisposable
+@inject CookieData Cookies
+@inject ProtectedLocalStorage ProtectedStorage
+@inject IJSRuntime JS
+
+<h3 class="game-title">Крестики-нолики</h3>
+
+@if (_gameResponse is { Game: not null })
 {
-    <div>
+    @if (!string.IsNullOrEmpty(_gameResponse.Game?.JoinCode))
+    {
+        <div class="join-code-box" @onclick="CopyJoinCode" title="Нажмите, чтобы скопировать код">
+            <span>Код для подключения: <strong>@_gameResponse.Game.JoinCode</strong></span>
+            <span class="copy-icon">📋</span>
+        </div>
+    }
+    
+    @if (ShowCopiedMessage)
+    {
+        <div class="copied-popup">Код скопирован</div>
+    }
+    
+    @if (!IsBot && _gameResponse.Game.State == "InProgress")
+    {
+        <div class="turn-indicator @(IsMyTurn ? "my-turn" : "waiting-turn")">
+            <span>
+                @(IsMyTurn ? "Сейчас ваш ход" : "Ход соперника")
+            </span>
+            @if (!IsMyTurn)
+            {
+                <span style="font-size: 20px;">⏳</span>
+            }
+        </div>
+    }
+    
+    
+    <div class="game-board">
         @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
         {
             <div class="game-row">
                 @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys)
                 {
-                    <button @onclick="@(async () => await MakeMove(int.Parse(rowKey), int.Parse(columnKey)))">@_gameResponse.Game.GameMap[rowKey][columnKey]</button>
+                    <button class="cell @(IsWinningCell(int.Parse(rowKey), int.Parse(columnKey)) ? (IsWin ? "winner-cell" : "loser-cell") : "")"
+                            disabled="@(!IsMyTurn || !string.IsNullOrEmpty(_gameResponse.Game.GameMap[rowKey][columnKey]))"
+                            @onclick="() => MakeMove(int.Parse(rowKey), int.Parse(columnKey))">
+                        @_gameResponse.Game.GameMap[rowKey][columnKey]
+                    </button>
                 }
             </div>
         }
     </div>
+    
+    @if (_gameResponse?.Game?.State != "InProgress")
+    {
+        <div class="info-message">
+            <p>@_gameResponse.Message</p>
+            <p>Хотите сыграть ещё раз?</p>
+
+            @if (!_selectMode)
+            {
+                <button @onclick="() => _selectMode = true">Сыграть ещё</button>
+                <button @onclick="StartOver">На главную</button>
+            }
+            else
+            {
+                <div style="margin-top: 10px;">
+                    <p>Выберите режим:</p>
+                    <button @onclick="() => RestartGame(true)">С ботом</button>
+                    <button @onclick="() => _friendOptions = true">С другом</button>
+                </div>
+
+                @if (_friendOptions)
+                {
+                    <div style="margin-top: 10px;">
+                        <button @onclick="() => RestartGame(false)">Создать игру</button>
+
+                        <div>
+                            <label>Код подключения:</label>
+                            <input @bind="JoinCodeInput" />
+                            <button @onclick="JoinFriendGame">Подключиться</button>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(JoinError))
+                {
+                    <div class="error-message">@JoinError</div>
+                }
+            }
+        </div>
+    }
+
 }
 else if (_gameResponse?.Error != null)
 {
-    <div>@_gameResponse.Error</div>
+    <div class="error-message">@_gameResponse.Error</div>
 }
 
-@if (_gameResponse != null && !string.IsNullOrEmpty(_gameResponse.Message) && _gameResponse.Game == null)
-{
-    <div>
-        <span>@_gameResponse.Message</span>
-        <button @onclick="StartOver">OK</button>
-    </div>
-}
+<style>
+    .game-title {
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .game-board {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .game-row {
+        display: flex;
+    }
+
+    .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+        font-weight: bold;
+        text-align: center;
+        margin: 4px;
+        background-color: #f0f8ff; /* светлый фон по умолчанию */
+        color: #222; /* тёмный, читаемый текст */
+        border: 2px solid #4CAF50;
+        border-radius: 10px;
+        transition: background-color 0.3s;
+    }
+    
+    .cell:hover:enabled {
+        background-color: #ecaf4f;
+        cursor: pointer;
+    }
+    
+    .cell:disabled {
+        opacity: 1; /* не затемнять */
+        background-color: #e0e0e0; /* светло-серый фон */
+        color: #222; /* явно задать цвет символа */
+        pointer-events: none; /* чтобы не нажималось */
+    }
+
+    .join-code-box {
+        background-color: #eef;
+        border: 2px dashed #007bff;
+        color: #007bff;
+        padding: 10px 20px;
+        margin: 10px auto;
+        width: fit-content;
+        font-size: 16px;
+        border-radius: 6px;
+    }
+
+    .error-message, .info-message {
+        margin-top: 20px;
+        padding: 10px;
+        font-size: 16px;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .info-message {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border-color: #d6d8db;
+    }
+
+    .info-message button {
+        margin-top: 10px;
+        padding: 6px 12px;
+        font-size: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .info-message button:hover {
+        background-color: #0056b3;
+    }
+    
+    .winner-cell {
+        background-color: #a2ffb5 !important;
+        border-color: #2ecc71 !important;
+        color: #000 !important;
+        font-weight: 900;
+    }
+    
+    .loser-cell {
+            background-color: #ff5f5f !important;
+            border-color: #ff0009 !important;
+            color: #000 !important;
+            font-weight: 900;
+        }
+    
+   .turn-indicator {
+       text-align: center;
+       margin: 20px auto;
+       font-size: 20px;
+       font-weight: bold;
+       padding: 10px 20px;
+       border-radius: 10px;
+       background-color: #f5f5f5;
+       border: 1px solid #ccc;
+       width: fit-content;
+   }
+   
+   .join-code-box {
+       background-color: #eef;
+       border: 2px dashed #007bff;
+       color: #007bff;
+       padding: 10px 20px;
+       margin: 10px auto;
+       width: fit-content;
+       font-size: 16px;
+       border-radius: 6px;
+       cursor: pointer;
+       display: flex;
+       align-items: center;
+       gap: 10px;
+       transition: background-color 0.3s;
+   }
+   
+   .join-code-box:hover {
+       background-color: #ddeeff;
+   }
+   
+   .copy-icon {
+       font-size: 18px;
+   }
+   
+   .copied-popup {
+       position: absolute;
+       top: 100px;
+       left: 50%;
+       transform: translateX(-50%);
+       background-color: #007bff;
+       color: white;
+       padding: 10px 16px;
+       border-radius: 8px;
+       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+       font-size: 14px;
+       z-index: 999;
+   }
+</style>
 
 @code {
+    private HubConnection _hubConnection;
     private GameResponse _gameResponse;
+    private bool IsMyTurn = false;
+    private bool IsBot = false;
+    private bool IsWin = false;
+    private string CurrentUserId;
+    private bool _selectMode;
+    private bool _friendOptions;
+    private string JoinCodeInput;
+    private string JoinError;
+    private bool ShowCopiedMessage;
+    
+    [Inject] protected IConfiguration Configuration { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        _gameResponse = await GameService.GetGame(); // Попробуйте получить текущую игру при инициализации
+        _gameResponse = await GameService.GetGame();
+        CurrentUserId = await GameService.GetCurrentUserId();
+        if (_gameResponse.Game == null)
+            NavigationManager.NavigateTo("/");
+        
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Configuration.GetConnectionString("TicTacToeServer") + "/gameHub")
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<string>("GameUpdated", async (response) =>
+        {
+            try
+            {
+                _gameResponse.Game = JsonConvert.DeserializeObject<Game>(response);
+
+                bool success = TrySetWinnerData();
+                if (!success)
+                {
+                    IsMyTurn = _gameResponse.Game.PlayerIdTurn == CurrentUserId;
+                }
+
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Ошибка при обновлении игры: {ex.Message}");
+            }
+        });
+
+        await _hubConnection.StartAsync();
+
+        if (!string.IsNullOrEmpty(_gameResponse.Game?.SessionId))
+        {
+            await _hubConnection.InvokeAsync("JoinSession", _gameResponse.Game.SessionId);
+            IsBot = _gameResponse.Game.Player2Id == "AI";
+            IsMyTurn = _gameResponse.Game.PlayerIdTurn == CurrentUserId || IsBot;
+        }
+    }
+
+    private bool TrySetWinnerData()
+    {
+        if (IsBot)
+        {
+            if (_gameResponse.Game.State == "Player1Win")
+            {
+                IsWin = true;
+                _gameResponse.Message = "Вы победили!";
+                return true;
+            }
+
+            if (_gameResponse.Game.State == "Player2Win")
+            {
+                IsWin = false;
+                _gameResponse.Message = "Вы проиграли!";
+                return true;
+            }
+
+            if (_gameResponse.Game.State == "Tie")
+            {
+                _gameResponse.Message = "Ничья!";
+                return true;
+            }
+            
+            return false;
+        }
+
+        if (_gameResponse.Game.State == "Tie")
+        {
+            _gameResponse.Message = "Ничья!";
+            return true;
+        }
+        
+        if (_gameResponse.Game.PlayerIdWin == null)
+            return false;
+        
+        if (_gameResponse.Game.PlayerIdWin == CurrentUserId)
+        {
+            IsWin = true;
+            _gameResponse.Message = "Вы победили!";
+            return true;
+        }
+        
+        IsWin = false;
+        _gameResponse.Message = "Вы проиграли!";
+        return true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+            await _hubConnection.DisposeAsync();
     }
 
     private async Task MakeMove(int row, int column)
     {
+        if (!IsMyTurn)
+            return;
+        
         var response = await GameService.MakeMove(row, column);
-        //TODO: не обрабатываем ошибки тут
+
         if (response.Game == null && response.Error != null)
             return;
 
         _gameResponse.Game = response.Game;
         _gameResponse.Message = response.Message;
+        TrySetWinnerData();
+        
+        if (!IsBot)
+            IsMyTurn = false; // Ждём сигнал от противника
     }
 
+    private async Task CreateGame(bool againstBot)
+    {
+        IsMyTurn = true;
+        _gameResponse = await GameService.CreateGame(againstBot);
+
+        if (!string.IsNullOrEmpty(_gameResponse.Game?.SessionId))
+        {
+            if (_hubConnection.State == HubConnectionState.Connected)
+            {
+                await _hubConnection.InvokeAsync("JoinSession", _gameResponse.Game?.SessionId);
+            }
+        }
+
+        StateHasChanged();
+    }
+    
+    private bool IsWinningCell(int row, int col)
+    {
+        var winning = _gameResponse.Game?.WinningCells;
+        return winning.Any() && winning.Any(coords => coords.Row == row && coords.Col == col);
+    }
+    
     private void StartOver()
     {
         _gameResponse = null;
         NavigationManager.NavigateTo("/");
+    }
+
+    private async Task CopyJoinCode()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", _gameResponse.Game.JoinCode);
+        ShowCopiedMessage = true;
+        StateHasChanged();
+
+        // Скрыть через 1.5 сек
+        await Task.Delay(1500);
+        ShowCopiedMessage = false;
+        StateHasChanged();
+    }
+
+    private async Task RestartGame(bool withBot)
+    {
+        JoinError = null;
+        await GameService.CreateGame(withBot);
+        NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+    }
+    
+    private async Task JoinFriendGame()
+    {
+        JoinError = null;
+        if (string.IsNullOrWhiteSpace(JoinCodeInput))
+        {
+            JoinError = "Введите код!";
+            return;
+        }
+
+        var success = await GameService.JoinGame(JoinCodeInput);
+        if (success)
+            NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+        else
+            JoinError = "Не удалось подключиться к игре";
     }
 }

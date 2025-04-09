@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using UserInterface.Data
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -9,11 +10,11 @@
     <link rel="stylesheet" href="app.css"/>
     <link rel="stylesheet" href="UserInterface.styles.css"/>
     <link rel="icon" type="image/png" href="favicon.png"/>
-    <HeadOutlet/>
+    <HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender: false)"/>
 </head>
 
 <body>
-<Routes @rendermode=RenderMode.InteractiveServer />
+<Routes @rendermode="new InteractiveServerRenderMode(prerender: false)"></Routes>
 <script src="_framework/blazor.web.js"></script>
 <script>
     window.blazorExtensions = {

@@ -1,42 +1,239 @@
 ﻿@page "/"
 @using UserInterface.Services
+@using UserInterface.Data
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject GameService GameService
 @inject NavigationManager NavigationManager
-@inject ILogger<GameService> Logger
+@inject CookieData Cookies
+@inject ProtectedLocalStorage ProtectedStorage
 
-<button @onclick="StartNewGame">Начать новую игру</button>
-<button @onclick="ContinueGame">Продолжить предыдущую игру</button>
+<div class="start-page-container">
+    <h3 class="title">Крестики-нолики</h3>
 
-@if (_startNewGame)
-{
-    <div>
-        <span>Хотите ли вы ходить первым?</span>
-        <button @onclick="async () => await CreateGame(true)">Да</button>
-        <button @onclick="async () => await CreateGame(false)">Нет</button>
+    <div class="form-section">
+        <label>Ваше имя:</label>
+        <input @bind="PlayerName" class="name-input" />
     </div>
+
+    <div class="button-section">
+        <button class="main-button"
+                disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+                @onclick="() => StartNewGame()">Новая игра</button>
+
+        <button class="main-button"
+                disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+                @onclick="() => ContinueGame()">Продолжить</button>
+    </div>
+
+
+    @if (_selectGameMode)
+    {
+        <div class="choice-section">
+            <p>С кем вы хотите сыграть?</p>
+            <button class="choice-button" @onclick="() => CreateGame(true)">С ботом</button>
+            <button class="choice-button" @onclick="() => WithFriend()">С другом</button>
+        </div>
+    }
+
+    @if (_joinFriendMode)
+    {
+        <div class="friend-mode">
+            <button class="choice-button" @onclick="() => CreateGame(false)">Создать игру</button>
+
+            <div style="margin-top: 15px;">
+                <label>Введите код для подключения:</label>
+                <input @bind="JoinCodeInput" />
+                <button class="choice-button" @onclick="JoinFriendGame">Подключиться</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(JoinError))
+            {
+                <div class="error-message">@JoinError</div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .title {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .form-section {
+        margin-bottom: 10px;
+    }
+
+    .name-input {
+        padding: 8px;
+        font-size: 16px;
+        width: 250px;
+    }
+
+    .validation-message {
+        color: red;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+
+    .button-section {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .main-button {
+        margin-right: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #337ab7;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .main-button:hover {
+        background-color: #286090;
+    }
+
+    .choice-section {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        display: inline-block;
+        background-color: #f9f9f9;
+    }
+
+    .choice-button {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 14px;
+        background-color: #5cb85c;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .choice-button:hover {
+        background-color: #449d44;
+    }
+	
+	.main-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.start-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    text-align: center;
 }
 
-@code {
-    private bool _startNewGame;
+.game-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
 
+.name-entry {
+    margin-bottom: 20px;
+}
+
+.name-entry label {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.name-input {
+    padding: 8px 12px;
+    font-size: 16px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.button-section {
+    display: flex;
+    gap: 20px;
+}
+
+.main-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.main-button:hover:enabled {
+    background-color: #0056b3;
+}
+
+.main-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+</style>
+
+@code {
+    private string PlayerName = "";
+    private bool _selectGameMode = false;
+    private bool _joinFriendMode = false;
+
+    private string JoinCodeInput;
+    private string JoinError;
+    
     private void StartNewGame()
     {
-        _startNewGame = true;
+        _selectGameMode = true;
     }
 
     private void ContinueGame()
     {
-        Logger.LogDebug("Hello");
-        _startNewGame = false;
-        // Здесь мы перенаправляем пользователя на компонент игры, который автоматически попытается загрузить текущую игру
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
     }
 
-    private async Task CreateGame(bool playerFirst)
+    private async Task CreateGame(bool againstBot)
     {
-        _startNewGame = false;
-        await GameService.CreateGame(playerFirst);
-        // После создания новой игры перенаправляем пользователя на компонент игры
+        JoinError = null;
+        await GameService.Identify(PlayerName);
+        await GameService.CreateGame(againstBot);
         NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+    }
+
+    private void WithFriend()
+    {
+        _selectGameMode = false;
+        _joinFriendMode = true;
+    }
+
+    private async Task JoinFriendGame()
+    {
+        JoinError = null;
+
+        if (string.IsNullOrWhiteSpace(JoinCodeInput))
+        {
+            JoinError = "Введите код подключения.";
+            return;
+        }
+
+        await GameService.Identify(PlayerName);
+
+        var success = await GameService.JoinGame(JoinCodeInput);
+        if (!success)
+        {
+            JoinError = "Не удалось подключиться. Проверьте код.";
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/tictactoe", forceLoad: true);
+        }
     }
 }

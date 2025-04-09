@@ -1,35 +1,142 @@
 ﻿using System.Net;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using UserInterface.DTO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.JSInterop;
+using UserInterface.Data;
 
 namespace UserInterface.Services;
 public class GameService
 {
     private readonly HttpClient _httpClient;
-    private string _sessionCookieName = ".AspNetCore.Session";
+    private readonly CookieData _cookieData;
+    private readonly ProtectedLocalStorage _protectedLocalStorage;
     
-    public GameService(IHttpClientFactory httpClientFactory)
+    public GameService(IHttpClientFactory httpClientFactory, 
+        CookieData cookieData, 
+        ProtectedLocalStorage protectedLocalStorage)
     {
+        _cookieData = cookieData;
+        _protectedLocalStorage = protectedLocalStorage;
         _httpClient = httpClientFactory.CreateClient("MyClient");
     }
-
-    public async Task<GameResponse> CreateGame(bool playerFirst)
+    
+    public async Task<GameResponse> CreateGame(bool againstBot)
     {
-        var response = await _httpClient.PostAsJsonAsync($"/api/game?playerFirst={playerFirst}", new {});
+        var cookies = await GetCookieHeadersAsync();
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Post, $"/api/game?againstBot={againstBot}",
+            await GetCookieHeadersAsync());
+
+        var response = await _httpClient.SendAsync(message);
+        
+        if (!response.IsSuccessStatusCode)
+            return new GameResponse()
+            {
+                Error = "Не удалось создать игру, попробуйте позже"
+            };
+        
+        await SaveCookieHeadersAsync(response);
         return await response.Content.ReadFromJsonAsync<GameResponse>();
     }
 
+    public async Task<bool> JoinGame(string code)
+    {
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Post, $"/api/Game/Join?joinCode={code}",
+            await GetCookieHeadersAsync());
+
+        var response = await _httpClient.SendAsync(message);
+        if (!response.IsSuccessStatusCode)
+            return false;
+
+        var result = await response.Content.ReadFromJsonAsync<GameResponse>();
+        if (result?.Game == null)
+            return false;
+
+        await SaveCookieHeadersAsync(response);
+        
+        return true;
+    }
+    
     public async Task<GameResponse> GetGame()
     {
-        return await _httpClient.GetFromJsonAsync<GameResponse>("/api/game");
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Get, "/api/game",
+            await GetCookieHeadersAsync());
+        var response = await _httpClient.SendAsync(message);
+
+        if (response.StatusCode == HttpStatusCode.NoContent)
+            return new GameResponse();
+
+        if (!response.IsSuccessStatusCode)
+            return new GameResponse
+            {
+                Error = "Не удалось получить игру, попробуйте позже"
+            };
+        
+        var body = await response.Content.ReadFromJsonAsync<GameResponse>();
+        await SaveCookieHeadersAsync(response);
+        return body;
     }
 
     public async Task<GameResponse> MakeMove(int row, int column)
     {
-        var response = await _httpClient.PatchAsync($"/api/game?row={row}&column={column}", null);
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Patch, $"/api/game?row={row}&column={column}",
+            await GetCookieHeadersAsync());
+        var response = await _httpClient.SendAsync(message);
+
+        if (!response.IsSuccessStatusCode)
+            return new GameResponse()
+            {
+                Error = "Не удалось сделать ход, попробуйте позже"
+            };
+        
+        await SaveCookieHeadersAsync(response);
+        
         return await response.Content.ReadFromJsonAsync<GameResponse>();
+    }
+
+    public async Task<string> GetCurrentUserId()
+    {
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Get, "/api/Identification",
+            await GetCookieHeadersAsync());
+        
+        var resp = await _httpClient.SendAsync(message);
+        resp.EnsureSuccessStatusCode();
+        
+        await SaveCookieHeadersAsync(resp);
+        return await resp.Content.ReadAsStringAsync();
+    }
+    
+    public async Task Identify(string playerName)
+    {
+        var message = HttpRequestBuilder.BuildRequest(HttpMethod.Post, $"/api/Identification?username={playerName}",
+            await GetCookieHeadersAsync());
+        var response = await _httpClient.SendAsync(message);
+        response.EnsureSuccessStatusCode();
+        await SaveCookieHeadersAsync(response);
+    }
+
+    private async Task SaveCookieHeadersAsync(HttpResponseMessage response)
+    {
+        IEnumerable<string> cookies = response.Headers.SingleOrDefault(header => header.Key == "Set-Cookie").Value;
+
+        if (cookies is not null && cookies.Any())
+        {
+            var cookieHeader = string.Join("; ", cookies);
+            await _protectedLocalStorage.SetAsync("Session Cookie String", HeaderNames.Cookie, cookieHeader);
+        }
+    }
+
+    private async Task<Dictionary<string, string>> GetCookieHeadersAsync()
+    {
+        var cookies = await _protectedLocalStorage.GetAsync<string>("Session Cookie String", HeaderNames.Cookie);
+        
+        if (cookies.Success)
+            return new Dictionary<string, string>()
+            {
+                { HeaderNames.Cookie, cookies.Value }
+            };
+        
+        return null;
     }
 }

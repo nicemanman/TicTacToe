@@ -1,11 +1,11 @@
 ﻿using Server.DataModel;
 
-namespace Server.AI;
+namespace Server.OpponentManager;
 
 /// <summary>
 /// Оппонент в игре крестики-нолики
 /// </summary>
-public interface IOpponentManager
+public interface IBotManager
 {
     public Game MakeMove(Game game);
 }

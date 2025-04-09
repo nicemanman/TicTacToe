@@ -18,6 +18,5 @@ public class SimpleBot : IBot
     {
         Turn currentTurn = _ai.GetNextBestMove(game.Board);
         game.Board.SetOpponent(currentTurn.Row, currentTurn.Column);
-        game.UpdateGameState();
     }
 }

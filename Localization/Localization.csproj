@@ -15,6 +15,10 @@
         <Generator>PublicResXFileCodeGenerator</Generator>
         <LastGenOutput>Errors.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <EmbeddedResource Update="GameSession\GameSessionMessages.resx">
+        <Generator>PublicResXFileCodeGenerator</Generator>
+        <LastGenOutput>GameSessionMessages.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,6 +31,11 @@
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
         <DependentUpon>Errors.resx</DependentUpon>
+      </Compile>
+      <Compile Update="GameSession\GameSessionMessages.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>GameSessionMessages.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 

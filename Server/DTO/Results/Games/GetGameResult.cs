@@ -1,6 +1,6 @@
 ﻿using Server.DataModel;
 
-namespace Server.DTO.Results;
+namespace Server.DTO.Results.Games;
 
 public class GetGameResult
 {

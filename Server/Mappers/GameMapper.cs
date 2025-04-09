@@ -12,11 +12,21 @@ public class GameMapper : Profile
 {
     public GameMapper()
     {
-        CreateMap<Game, GameDTO>()
+        CreateMap<GameSession, GameDTO>()
             .ForMember(x => x.GameMap, expression =>
             {
-                expression.MapFrom(x=> MapFieldsToNestedDictionary(x.GameMap.Fields));
-            });
+                expression.MapFrom(x=> MapFieldsToNestedDictionary(x.Game.GameMap.Fields));
+            })
+            .ForMember(x=>x.JoinCode, 
+                expression => expression.MapFrom(x=>x.JoinCode))
+            .ForMember(x=>x.PlayerIdTurn, 
+                expression => expression.MapFrom(x=>x.PlayerIdTurn))
+            .ForMember(x => x.State, 
+                expression => expression.MapFrom(x => x.GameState))
+            .ForMember(x=>x.SessionId, 
+                expression => expression.MapFrom(x => x.UUID))
+            .ForMember(x=>x.WinningCells, 
+                expression => expression.MapFrom(x => x.Game.WinningCells));
         
         CreateMap<Game, AIGame>()
             .ForMember(dst => dst.Board, expression =>
@@ -28,7 +38,12 @@ public class GameMapper : Profile
             .ForMember(dst => dst.GameMap, expression =>
             {
                 expression.Ignore();
-            });
+            })
+            .ForMember(dst => dst.State, 
+                expression => expression.MapFrom(x=>x.State))
+            .ForMember(dst => dst.WinningCells, opt => opt.MapFrom(src =>
+                src.WinningCells.Select(cell => new CellCoord(cell.Item1, cell.Item2)).ToList()
+            ));
     }
 
     private GameMap MapGameBoardToGameMap(IBoard board)
