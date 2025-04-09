@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  ui:
+    build:
+      context: "C:\\0Repository\\TicTacToe"
+      dockerfile: "UserInterface/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/UserInterface.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net8.0/UserInterface.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "tic-tac-toe-ui:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\IFalko\\.nuget\\packages:/home/app/.nuget/packages"
+    - "C:\\0Repository\\TicTacToe\\UserInterface:/app:rw"
+    - "C:\\0Repository\\TicTacToe:/src:rw"
+    working_dir: "/app"
