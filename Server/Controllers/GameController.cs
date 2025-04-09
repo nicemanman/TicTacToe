@@ -163,21 +163,11 @@ public class GameController : Controller
                 {
                     Error = makeAMoveResult.Error
                 });
-
-            if (!makeAMoveResult.Value.IsGameFinished)
-                return Ok(new MakeAMoveSuccessResponse()
-                {
-                    Game = _mapper.Map<GameSession, GameDTO>(makeAMoveResult.Value)
-                });
-            
-            TryGetWinnerMessage(makeAMoveResult.Value, out var outcome);
             
             return Ok(new MakeAMoveSuccessResponse()
             {
-                Message = outcome,
                 Game = _mapper.Map<GameSession, GameDTO>(makeAMoveResult.Value)
             });
-
         }
         catch (Exception ex)
         {
@@ -187,29 +177,6 @@ public class GameController : Controller
             {
                 Error = Errors.UnknownError
             });
-        }
-    }
-    
-    private static bool TryGetWinnerMessage(GameSession game, out string message)
-    {
-        message = string.Empty;
-        
-        if (!game.IsGameFinished)
-            return false;
-        
-        switch (game.GameState)
-        {
-            case GameState.Tie:
-                message = GameMessages.GameFinished_ItsATie;
-                return true;
-            case GameState.Player1Win:
-                message = GameMessages.GameFinished_PlayerWin;
-                return true;
-            case GameState.Player2Win:
-                message = GameMessages.GameFinished_OpponentWin;
-                return true;
-            default:
-                return false;
         }
     }
 }

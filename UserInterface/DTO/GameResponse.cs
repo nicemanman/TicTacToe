@@ -21,6 +21,8 @@ public class Game
     public string Player2Id { get; set; }
     
     public string PlayerIdTurn { get; set; }
+    
+    public string PlayerIdWin { get; set; }
 }
 
 public class CellCoord

@@ -78,7 +78,7 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил противник.
+        ///   Looks up a localized string similar to Результат матча - победили нули.
         /// </summary>
         public static string GameFinished_OpponentWin {
             get {
@@ -87,7 +87,7 @@ namespace Localization.Game {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Результат матча - победил игрок.
+        ///   Looks up a localized string similar to Результат матча - победили иксы.
         /// </summary>
         public static string GameFinished_PlayerWin {
             get {

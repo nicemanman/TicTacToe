@@ -7,50 +7,52 @@
 @inject CookieData Cookies
 @inject ProtectedLocalStorage ProtectedStorage
 
-<h3 class="title">Крестики-нолики</h3>
+<div class="start-page-container">
+    <h3 class="title">Крестики-нолики</h3>
 
-<div class="form-section">
-    <label>Ваше имя:</label>
-    <input @bind="PlayerName" class="name-input" />
-</div>
-
-<div class="button-section">
-    <button class="main-button"
-            disabled="@string.IsNullOrWhiteSpace(PlayerName)"
-            @onclick="() => StartNewGame()">Новая игра</button>
-
-    <button class="main-button"
-            disabled="@string.IsNullOrWhiteSpace(PlayerName)"
-            @onclick="() => ContinueGame()">Продолжить</button>
-</div>
-
-
-@if (_selectGameMode)
-{
-    <div class="choice-section">
-        <p>С кем вы хотите сыграть?</p>
-        <button class="choice-button" @onclick="() => CreateGame(true)">С ботом</button>
-        <button class="choice-button" @onclick="() => WithFriend()">С другом</button>
+    <div class="form-section">
+        <label>Ваше имя:</label>
+        <input @bind="PlayerName" class="name-input" />
     </div>
-}
 
-@if (_joinFriendMode)
-{
-    <div class="friend-mode">
-        <button class="choice-button" @onclick="() => CreateGame(false)">Создать игру</button>
+    <div class="button-section">
+        <button class="main-button"
+                disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+                @onclick="() => StartNewGame()">Новая игра</button>
 
-        <div style="margin-top: 15px;">
-            <label>Введите код для подключения:</label>
-            <input @bind="JoinCodeInput" />
-            <button class="choice-button" @onclick="JoinFriendGame">Подключиться</button>
+        <button class="main-button"
+                disabled="@string.IsNullOrWhiteSpace(PlayerName)"
+                @onclick="() => ContinueGame()">Продолжить</button>
+    </div>
+
+
+    @if (_selectGameMode)
+    {
+        <div class="choice-section">
+            <p>С кем вы хотите сыграть?</p>
+            <button class="choice-button" @onclick="() => CreateGame(true)">С ботом</button>
+            <button class="choice-button" @onclick="() => WithFriend()">С другом</button>
         </div>
+    }
 
-        @if (!string.IsNullOrEmpty(JoinError))
-        {
-            <div class="error-message">@JoinError</div>
-        }
-    </div>
-}
+    @if (_joinFriendMode)
+    {
+        <div class="friend-mode">
+            <button class="choice-button" @onclick="() => CreateGame(false)">Создать игру</button>
+
+            <div style="margin-top: 15px;">
+                <label>Введите код для подключения:</label>
+                <input @bind="JoinCodeInput" />
+                <button class="choice-button" @onclick="JoinFriendGame">Подключиться</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(JoinError))
+            {
+                <div class="error-message">@JoinError</div>
+            }
+        </div>
+    }
+</div>
 
 <style>
     .title {
@@ -122,7 +124,62 @@
     cursor: not-allowed;
     opacity: 0.7;
 }
+.start-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    text-align: center;
+}
 
+.game-title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.name-entry {
+    margin-bottom: 20px;
+}
+
+.name-entry label {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.name-input {
+    padding: 8px 12px;
+    font-size: 16px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.button-section {
+    display: flex;
+    gap: 20px;
+}
+
+.main-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.main-button:hover:enabled {
+    background-color: #0056b3;
+}
+
+.main-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
 </style>
 
 @code {

@@ -215,7 +215,14 @@ public class GameSessionManager(
 		session.Game.State = result.state;
 		session.Game.WinningCells = result.winningCells;
 		session.GameState = session.Game.State;
-		
+
+		session.PlayerIdWin = session.Game.State switch
+		{
+			GameState.Player1Win => session.Player1Id,
+			GameState.Player2Win => session.Player2Id,
+			_ => session.PlayerIdWin
+		};
+
 		var updatedSession = await unitOfWork.GameSessionRepository.UpdateAsync(session);
 		
 		var gameDto = mapper.Map<GameSession, GameDTO>(updatedSession);
