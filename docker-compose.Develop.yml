@@ -1,6 +1,7 @@
 ﻿services:
   ui:
     image: tic-tac-toe-ui
+    hostname: ui
     ports:
       - '5001:8080'
     networks:
@@ -72,7 +73,9 @@
     ports:
       - "80:80"
       - "443:443"
-    command: caddy reverse-proxy --from tictactoe.cloud --to :5001
+    networks:
+      - tictactoe-network
+    command: caddy reverse-proxy --from https://tictactoe.cloud --to http://ui:5001
     volumes:
       - caddy_data:/data
       - caddy_config:/config    
