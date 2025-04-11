@@ -79,7 +79,7 @@ public class GameService
         
         var body = await response.Content.ReadFromJsonAsync<GameResponse>();
         await SaveCookieHeadersAsync(response);
-        await js.InvokeVoidAsync("console.log", $"CreateGame - {JsonConvert.SerializeObject(body)}");
+        await js.InvokeVoidAsync("console.log", $"Get Game - {JsonConvert.SerializeObject(body)}");
         return body;
     }
 
