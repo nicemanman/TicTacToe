@@ -67,10 +67,22 @@
       timeout: 3s
       retries: 30
       
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    command: caddy reverse-proxy --from http://tictactoe.cloud --to 127.0.0.1:80
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config    
+  
 volumes:
   db:
   rabbit-data:
   rabbit-log:
+  caddy_data:
+  caddy_config:
     
 networks:
   tictactoe-network:
