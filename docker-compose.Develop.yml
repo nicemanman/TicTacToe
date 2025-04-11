@@ -18,9 +18,9 @@
     hostname: server
     depends_on: 
       message-queue:
-        condition: service_healthy
+        condition: service_started
       db:
-        condition: service_healthy
+        condition: service_started
     networks:
       - tictactoe-network
     environment:
