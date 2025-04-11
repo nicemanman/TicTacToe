@@ -75,7 +75,7 @@
       - "443:443"
     networks:
       - tictactoe-network
-    command: caddy reverse-proxy --from https://tictactoe.cloud --to http://ui:5001
+    command: caddy reverse-proxy --from https://tictactoe.cloud --to http://ui:8080
     volumes:
       - caddy_data:/data
       - caddy_config:/config    

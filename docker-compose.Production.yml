@@ -1,8 +1,7 @@
 ﻿services:
   ui:
     image: tic-tac-toe-ui
-    ports:
-      - '80:8080'
+    hostname: ui
     networks:
       - tictactoe-network
     environment:
@@ -59,11 +58,25 @@
       interval: 1s
       timeout: 3s
       retries: 30
-      
+  
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - tictactoe-network
+    command: caddy reverse-proxy --from https://tictactoe.cloud --to http://ui:8080
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+  
 volumes:
   db:
   rabbit-data:
   rabbit-log:
+  caddy_config:
+  caddy_data:
     
 networks:
   tictactoe-network:
