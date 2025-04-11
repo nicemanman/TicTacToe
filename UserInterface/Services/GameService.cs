@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.JSInterop;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using UserInterface.DTO;
@@ -10,26 +11,25 @@ namespace UserInterface.Services;
 public class GameService
 {
     private readonly HttpClient _httpClient;
-    private readonly CookieData _cookieData;
+    private readonly IJSRuntime js;
     private readonly ProtectedLocalStorage _protectedLocalStorage;
     
     public GameService(IHttpClientFactory httpClientFactory, 
-        CookieData cookieData, 
-        ProtectedLocalStorage protectedLocalStorage)
+        ProtectedLocalStorage protectedLocalStorage, 
+        IJSRuntime js)
     {
-        _cookieData = cookieData;
+
         _protectedLocalStorage = protectedLocalStorage;
+        this.js = js;
         _httpClient = httpClientFactory.CreateClient("MyClient");
     }
     
     public async Task<GameResponse> CreateGame(bool againstBot)
     {
-        var cookies = await GetCookieHeadersAsync();
         var message = HttpRequestBuilder.BuildRequest(HttpMethod.Post, $"/api/game?againstBot={againstBot}",
             await GetCookieHeadersAsync());
 
         var response = await _httpClient.SendAsync(message);
-        
         if (!response.IsSuccessStatusCode)
             return new GameResponse()
             {
@@ -37,7 +37,11 @@ public class GameService
             };
         
         await SaveCookieHeadersAsync(response);
-        return await response.Content.ReadFromJsonAsync<GameResponse>();
+        var gameResponse = await response.Content.ReadFromJsonAsync<GameResponse>();
+
+        await js.InvokeVoidAsync("console.log", $"CreateGame - {JsonConvert.SerializeObject(gameResponse)}");
+        
+        return gameResponse;
     }
 
     public async Task<bool> JoinGame(string code)
@@ -75,6 +79,7 @@ public class GameService
         
         var body = await response.Content.ReadFromJsonAsync<GameResponse>();
         await SaveCookieHeadersAsync(response);
+        await js.InvokeVoidAsync("console.log", $"CreateGame - {JsonConvert.SerializeObject(body)}");
         return body;
     }
 

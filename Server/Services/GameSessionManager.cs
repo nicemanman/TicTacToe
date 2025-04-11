@@ -110,7 +110,7 @@ public class GameSessionManager(
 				return Result.Fail<GameSession>(GameSessionMessages.SessionAlreadyCreated);
 			}
 
-			bool isBotFirst = new Random().Next(1, 3) == 1;
+			bool isBotFirst = true;
 			
 			if (isBotFirst)
 				session.Game = botManager.MakeMove(session.Game);

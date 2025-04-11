@@ -16,6 +16,11 @@
     ports:
       - '5000:8080'
     hostname: server
+    depends_on: 
+      message-queue:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     networks:
       - tictactoe-network
     environment:
