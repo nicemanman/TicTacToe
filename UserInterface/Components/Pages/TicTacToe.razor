@@ -43,16 +43,15 @@
         </div>
     }
     
-    
     <div class="game-board">
-        @foreach (var rowKey in _gameResponse.Game.GameMap.Keys)
+        @foreach (var rowKey in _gameResponse.Game.GameMap.Keys.Order())
         {
             <div class="game-row">
-                @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys)
+                @foreach (var columnKey in _gameResponse.Game.GameMap[rowKey].Keys.Order())
                 {
-                    <button class="cell @(IsWinningCell(int.Parse(rowKey), int.Parse(columnKey)) ? (IsWin ? "winner-cell" : "loser-cell") : "")"
+                    <button class="cell @(IsWinningCell(rowKey, columnKey) ? (IsWin ? "winner-cell" : "loser-cell") : "")"
                             disabled="@(!IsMyTurn || !string.IsNullOrEmpty(_gameResponse.Game.GameMap[rowKey][columnKey]))"
-                            @onclick="() => MakeMove(int.Parse(rowKey), int.Parse(columnKey))">
+                            @onclick="() => MakeMove(rowKey, columnKey)">
                         @_gameResponse.Game.GameMap[rowKey][columnKey]
                     </button>
                 }

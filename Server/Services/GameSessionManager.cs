@@ -256,8 +256,8 @@ public class GameSessionManager(
 		}
 		return Result.Ok(updatedSession);
 	}
-	
-	public static (GameState state, List<CellCoord> winningCells) CheckWinner(List<GameMapField> fields)
+
+	private static (GameState state, List<CellCoord> winningCells) CheckWinner(List<GameMapField> fields)
 	{
 		var board = new string[3, 3];
 		var winningCells = new List<CellCoord>();

@@ -10,7 +10,7 @@ public class GameResponse
 public class Game
 {
     public string State { get; set; }
-    public Dictionary<string, Dictionary<string, string>> GameMap { get; set; }
+    public Dictionary<int, Dictionary<int, string>> GameMap { get; set; }
     
     public List<CellCoord> WinningCells { get; set; }
     
