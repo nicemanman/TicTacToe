@@ -16,6 +16,11 @@
     hostname: server
     networks:
       - tictactoe-network
+    depends_on:
+      message-queue:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     build:
@@ -32,6 +37,11 @@
       - tictactoe-network
     volumes:
       - db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
       
   message-queue:
     image: rabbitmq:3-management-alpine
@@ -44,7 +54,12 @@
     volumes:
       - rabbit-data:/var/lib/rabbitmq/
       - rabbit-log:/var/log/rabbitmq/
-        
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      
 volumes:
   db:
   rabbit-data:

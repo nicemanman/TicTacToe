@@ -18,9 +18,9 @@
     hostname: server
     depends_on: 
       message-queue:
-        condition: service_started
+        condition: service_healthy
       db:
-        condition: service_started
+        condition: service_healthy
     networks:
       - tictactoe-network
     environment:
@@ -39,6 +39,11 @@
       - tictactoe-network
     ports:
       - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
     volumes:
       - db:/var/lib/postgresql/data
       
@@ -56,7 +61,12 @@
     volumes:
       - rabbit-data:/var/lib/rabbitmq/
       - rabbit-log:/var/log/rabbitmq/
-
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      
 volumes:
   db:
   rabbit-data:
