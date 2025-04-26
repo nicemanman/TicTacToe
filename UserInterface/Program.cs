@@ -1,7 +1,6 @@
 using BitzArt.Blazor.Cookies;
 using NLog.Extensions.Logging;
 using UserInterface.Components;
-using UserInterface.Data;
 using UserInterface.MessageHandlers;
 using UserInterface.Services;
 
@@ -36,8 +35,6 @@ public class Program
         
         builder.Services.AddTransient<CopyCookieHandler>();
         builder.Services.AddScoped<GameService>();
-        builder.Services.AddScoped<UsernameData>();
-        builder.Services.AddScoped<CookieData>();
         builder.AddBlazorCookies();
         var app = builder.Build();
 

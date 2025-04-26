@@ -9,8 +9,6 @@
 @inject GameService GameService
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
-@inject CookieData Cookies
-@inject ProtectedLocalStorage ProtectedStorage
 @inject IJSRuntime JS
 
 <h3 class="game-title">Крестики-нолики</h3>
@@ -276,7 +274,6 @@ else if (_gameResponse?.Error != null)
     protected override async Task OnInitializedAsync()
     {
         _gameResponse = await GameService.GetGame();
-        await JS.InvokeVoidAsync("console.log", $"Нашли игру с ID {_gameResponse.Game.SessionId}");
         CurrentUserId = await GameService.GetCurrentUserId();
         if (_gameResponse.Game == null)
         {

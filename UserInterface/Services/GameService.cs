@@ -1,11 +1,9 @@
 ﻿using System.Net;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.JSInterop;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using UserInterface.DTO;
-using UserInterface.Data;
 
 namespace UserInterface.Services;
 public class GameService
